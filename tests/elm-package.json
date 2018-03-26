@@ -1,0 +1,27 @@
+{
+    "version": "1.0.0",
+    "summary": "A starter project for elm apps using webpack",
+    "repository": "https://github.com/benansell/elm-webpack-seed.git",
+    "license": "BSD-3-Clause",
+    "source-directories": [
+        ".",
+        "../src"
+    ],
+    "exposed-modules": [],
+    "dependencies": {
+        "Fresheyeball/elm-font-awesome": "2.0.0 <= v < 3.0.0",
+        "benansell/elm-geometric-transformation": "1.0.0 <= v < 2.0.0",
+        "elm-community/easing-functions": "1.0.2 <= v < 2.0.0",
+        "elm-community/elm-test": "3.0.0 <= v < 4.0.0",
+        "elm-lang/animation-frame": "1.0.1 <= v < 2.0.0",
+        "elm-lang/core": "5.0.0 <= v < 6.0.0",
+        "elm-lang/html": "2.0.0 <= v < 3.0.0",
+        "elm-lang/svg": "2.0.0 <= v < 3.0.0",
+        "elm-lang/virtual-dom": "2.0.0 <= v < 3.0.0",
+        "rtfeldman/elm-css": "7.0.0 <= v < 8.0.0",
+        "rtfeldman/elm-css-helpers": "2.0.1 <= v < 3.0.0",
+        "rtfeldman/html-test-runner": "2.0.0 <= v < 3.0.0",
+        "rtfeldman/node-test-runner": "3.0.0 <= v < 4.0.0"
+    },
+    "elm-version": "0.18.0 <= v < 0.19.0"
+}

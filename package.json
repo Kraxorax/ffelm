@@ -1,0 +1,52 @@
+{
+  "name": "funkcionalni-fundamentalisti",
+  "version": "0.0.8",
+  "description": "A fundamental project for elm apps using webpack",
+  "keywords": [
+    "elm",
+    "webpack"
+  ],
+  "author": "haklab@googlegroups.com",
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:haklabbeograd/elm.git"
+  },
+  "license": "BSD-3-Clause",
+  "main": "index.html",
+  "dependencies": {},
+  "devDependencies": {
+    "autoprefixer": "^6.3.7",
+    "copy-webpack-plugin": "^4.0.1",
+    "css-loader": "^0.25.0",
+    "elm-css": "^0.6.0",
+    "elm-css-webpack-loader": "^2.0.2",
+    "elm-hot-loader": "^0.4.2",
+    "elm-test": "^0.18.0",
+    "elm-webpack-loader": "^3.0.6",
+    "extract-text-webpack-plugin": "^1.0.1",
+    "file-loader": "^0.9.0",
+    "font-awesome": "^4.7.0",
+    "html-webpack-plugin": "^2.24.1",
+    "node-elm-compiler": "^4.2.0",
+    "postcss-loader": "^1.1.1",
+    "rimraf": "^2.5.4",
+    "shx": "^0.2.0",
+    "style-loader": "^0.13.1",
+    "unminified-webpack-plugin": "^1.1.1",
+    "webpack": "^1.13.2",
+    "webpack-dev-server": "^1.16.2",
+    "webpack-merge": "^0.16.0"
+  },
+  "scripts": {
+    "clean": "rimraf dist node_modules elm-stuff tests/elm-stuff",
+    "prebuild": "rimraf dist",
+    "build": "webpack",
+    "build-ci": "elm-package install --yes && npm run build && npm run build-css && npm run build-test-html",
+    "build-css": "shx mkdir -p ./dist && elm-css src/Stylesheets.elm -o ./dist",
+    "build-test-html": "cd tests && elm-make --yes TestRunnerHtml.elm",
+    "start": "webpack-dev-server --content-base src/ --port 8000 --hot",
+    "test-console": "elm-test tests/TestRunnerConsole.elm || true",
+    "test-html": "cd tests && elm-reactor",
+    "test": "webpack-dev-server --content-base tests/ --port 9000"
+  }
+}
