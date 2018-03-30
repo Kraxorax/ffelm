@@ -1,7 +1,7 @@
 module GejmOfLajf exposing (..)
 
 import Matrix exposing (..)
-import Matrix.Extra exposing (neighbours)
+import Random exposing (pair, list, int, generate, Generator)
 import Time exposing (Time)
 import Html exposing (..)
 import Html.Attributes exposing (class, style)
@@ -10,8 +10,9 @@ import Array
 import Tuple
 
 
-boardSize : Int
-boardSize = 60
+defaultBoardSize : Int
+defaultBoardSize = 30
+
 
 boardPxWH : Int
 boardPxWH = 700
@@ -28,6 +29,8 @@ type Msg
     = Tick Time
     | ToggleRunning
     | Reseed
+    | Recreate (List(Int, Int))
+    | Zoom Int
 
 
 type alias Tabla =
@@ -36,6 +39,7 @@ type alias Tabla =
 
 type alias Model =
     { matrica : Tabla
+    , boardSize: Int
     , clock : Time
     , counter : Time
     , genNumb : Int
@@ -46,19 +50,22 @@ type alias Model =
 
 init : List ( Int, Int ) -> Model
 init zivi =
-    let
-        matrica =
-            (repeat boardSize boardSize Mrtva)
-                |> indexedMap
-                    (\x y c ->
-                        if List.member ( x, y ) zivi then
-                            Ziva
-                        else
-                            Mrtva
-                    )
-    in
-        Model matrica 0 0 0 True refreshTime
+    Model (ozivi zivi defaultBoardSize) defaultBoardSize 0 0 0 True refreshTime
 
+ozivi : List (Int, Int) -> Int -> Matrix Celija
+ozivi zivi boardSize =
+    (repeat boardSize boardSize Mrtva)
+        |> indexedMap
+            (\x y c ->
+                if List.member ( x, y ) zivi then
+                    Ziva
+                else
+                    Mrtva
+            )
+
+
+resize : Tabla -> Int -> Tabla
+resize t d = t
 
 numbOfZive : Int -> Int -> Tabla -> Int
 numbOfZive x y t =
@@ -78,8 +85,14 @@ okoloTorus x y t =
 
         l = List.map (\pos ->
             let
-                xn = modOp x mx ((+)(Tuple.first pos))
-                yn = modOp y my ((+)(Tuple.second pos))
+                dx = Tuple.first pos
+                dy = Tuple.second pos
+
+                --xn = dx + x % mx
+                --yn = dy + y % my
+                xn = modulo (dx + x) mx
+                yn = modulo (dy + y) my
+
                 n = Maybe.withDefault Mrtva (Matrix.get xn yn t)
             in
                 n
@@ -87,20 +100,13 @@ okoloTorus x y t =
     in
         l
 
-modOp : Int -> Int -> (Int -> Int) -> Int
-modOp a m o =
-    let
-        r = o a
-        rm = 
-            if r >= m 
-                then r - m
-            else if r < 0
-                then r + m
-            else r
-    in
-        rm
-
-
+modulo: Int -> Int -> Int
+modulo a m =
+    if a < 0
+        then m + a
+    else if a >= m
+        then m - a
+    else a
 
 novoStanje : Tabla -> Tabla
 novoStanje t =
@@ -152,15 +158,30 @@ tick dt model =
             , genNumb = gn
             , matrica = m }
 
-update : Msg -> Model -> Model
+update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
     case msg of
         ToggleRunning ->
-            { model | running = not model.running }
+            { model | running = not model.running } ! []
         Tick t ->
-            tick t model
+            tick t model ! []
         Reseed ->
-            model
+            model ! [generate Recreate (randomBrojevi model.boardSize)]
+        Recreate zivi ->
+            {   model
+            |   matrica = ozivi zivi model.boardSize
+            ,   genNumb = 0
+            ,   counter = 0
+            } ! []
+        Zoom d ->
+            let
+                newBoardSize = model.boardSize + d * 2
+            in
+                {   model
+                |   matrica = resize model.matrica newBoardSize
+                ,   boardSize = newBoardSize
+                } ! []
+
 
 celToEle : Celija -> List ( String, String ) -> Html msg
 celToEle c pos =
@@ -171,26 +192,26 @@ celToEle c pos =
         []
 
 
-cellSize : Int
-cellSize =
-    (toFloat boardPxWH / toFloat boardSize) |> floor
+cellSize : Int -> Int
+cellSize boardSize =
+    boardPxWH // boardSize
 
 
-matrixToBoard : Int -> Int -> Celija -> Html msg
-matrixToBoard x y c =
+matrixToBoard : Int -> Int -> Int -> Celija -> Html msg
+matrixToBoard boardSize x y c  =
     let
         x_ =
-            x * cellSize
+            x * (cellSize boardSize)
 
         y_ =
-            y * cellSize
+            y * (cellSize boardSize)
 
         pos =
             [ ( "top", (toString y_) ++ "px" ), ( "left", (toString x_) ++ "px" ) ]
 
         size =
-            [ ( "width", (toString cellSize) ++ "px" )
-            , ( "height", (toString cellSize) ++ "px" )
+            [ ( "width", (toString (cellSize boardSize)) ++ "px" )
+            , ( "height", (toString (cellSize boardSize)) ++ "px" )
             ]
     in
         celToEle c (pos ++ size)
@@ -203,12 +224,18 @@ istocifra a =
         String.padLeft pr '0' a
 
 
+randomBrojevi : Int -> Generator (List ( Int, Int ))
+randomBrojevi boardSize =
+    list ((toFloat boardSize ^ 2 / 4) |> floor)
+        <| pair (int 0 boardSize) (int 0 boardSize)
+
+
 view : Model -> Html Msg
 view model =
     div []
     [   div [ class "board" ]
             ((indexedMap
-                matrixToBoard
+                (matrixToBoard model.boardSize)
                 model.matrica
             )
                 |> toIndexedArray
@@ -227,7 +254,10 @@ view model =
                     button [ onClick ToggleRunning ] [text (if not model.running then "START" else "STOP")]
                 ]
             ,   td [] [
-                    button [ onClick ToggleRunning ] [text "RESTART"]
+                    button [ onClick Reseed ] [text "RESTART"]
+                ]
+            ,   td [] [
+                    button [ onClick (Zoom 1) ] [text "Zoom In"]
                 ]
             ]
         ,   tr [] [

@@ -47,7 +47,7 @@ init location =
                 GejmOfLajf.init
                     []
           }
-        , generate RandomGen randomBrojevi
+        , generate RandomGen (GejmOfLajf.randomBrojevi GejmOfLajf.defaultBoardSize)
         )
 
 
@@ -63,10 +63,6 @@ type Msg
     | RandomGen (List ( Int, Int ))
 
 
-randomBrojevi : Generator (List ( Int, Int ))
-randomBrojevi =
-    list ((toFloat GejmOfLajf.boardSize ^ 2 / 4) |> floor)
-        <| pair (int 0 GejmOfLajf.boardSize) (int 0 GejmOfLajf.boardSize)
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -152,16 +148,17 @@ update msg model =
                 ! []
 
         Gol golMsg ->
-            { model
-                | gol = GejmOfLajf.update golMsg model.gol
-            } ! []
+            let
+                modCmd = GejmOfLajf.update golMsg model.gol 
+            in
+                { model
+                    | gol = Tuple.first modCmd
+                } ! [ Cmd.map (\gm -> Gol gm) (Tuple.second modCmd)]
 
         RandomGen zivi ->
             { model
                 | gol = GejmOfLajf.init zivi
-            }
-                ! []
-
+            } ! []
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
