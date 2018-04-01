@@ -1,12 +1,13 @@
 module GejmOfLajf exposing (..)
 
 import Matrix exposing (..)
+import Matrix.Extra exposing (neighbours)
 import Random exposing (pair, list, int, generate, Generator)
 import Time exposing (Time)
 import Html exposing (..)
 import Html.Attributes exposing (class, style)
 import Html.Events exposing (onClick)
-import Array
+import Array.Hamt as Array
 import Tuple
 
 
@@ -65,7 +66,25 @@ ozivi zivi boardSize =
 
 
 resize : Tabla -> Int -> Tabla
-resize t d = t
+resize t d =
+    let
+        hsides = (repeat d (Matrix.height t)  Mrtva)
+
+        nt = Maybe.withDefault t
+            (concatHorizontal hsides t)
+        nt1 = Maybe.withDefault t
+            (concatHorizontal nt hsides)
+
+        vsides = (repeat (Matrix.width nt1) d Mrtva)  
+
+        nt2 = Maybe.withDefault t
+            (concatVertical vsides nt1)
+        nt3 = Maybe.withDefault nt2
+            (concatVertical nt2 vsides)
+    in
+        nt3
+        
+
 
 numbOfZive : Int -> Int -> Tabla -> Int
 numbOfZive x y t =
@@ -88,8 +107,6 @@ okoloTorus x y t =
                 dx = Tuple.first pos
                 dy = Tuple.second pos
 
-                --xn = dx + x % mx
-                --yn = dy + y % my
                 xn = modulo (dx + x) mx
                 yn = modulo (dy + y) my
 
@@ -178,7 +195,7 @@ update msg model =
                 newBoardSize = model.boardSize + d * 2
             in
                 {   model
-                |   matrica = resize model.matrica newBoardSize
+                |   matrica = resize model.matrica d
                 ,   boardSize = newBoardSize
                 } ! []
 
@@ -232,6 +249,15 @@ randomBrojevi boardSize =
 
 view : Model -> Html Msg
 view model =
+    let
+        board = (indexedMap
+                (matrixToBoard model.boardSize)
+                model.matrica
+            )
+            |> toIndexedArray
+    
+    in
+        
     div []
     [   div [ class "board" ]
             ((indexedMap
@@ -239,7 +265,7 @@ view model =
                 model.matrica
             )
                 |> toIndexedArray
-                |> Array.map Tuple.second
+                |> Array.map (\((_),c) -> c)
                 |> Array.toList
             )
     ,   table []
@@ -257,8 +283,12 @@ view model =
                     button [ onClick Reseed ] [text "RESTART"]
                 ]
             ,   td [] [
-                    button [ onClick (Zoom 1) ] [text "Zoom In"]
+                    button [ onClick (Zoom 1) ] [text "Zoom Out"]
                 ]
+            ,   td [] [
+                    button [ onClick (Zoom -1), Html.Attributes.disabled True ] [text "Zoom In"]
+                ]
+
             ]
         ,   tr [] [
                 td [] []

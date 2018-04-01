@@ -146,7 +146,6 @@ update msg model =
                 , gol = GejmOfLajf.tick diff model.gol
             }
                 ! []
-
         Gol golMsg ->
             let
                 modCmd = GejmOfLajf.update golMsg model.gol 

@@ -1,5 +1,5 @@
 {
-    "version": "0.0.8",
+    "version": "1.0.0",
     "summary": "A fundamental project for elm apps using webpack",
     "repository": "https://github.com/haklabbeograd/elm.git",
     "license": "BSD-3-Clause",
@@ -9,8 +9,9 @@
     "exposed-modules": [],
     "dependencies": {
         "Fresheyeball/elm-font-awesome": "2.0.0 <= v < 3.0.0",
+        "Skinney/elm-array-exploration": "2.0.5 <= v < 3.0.0",
         "benansell/elm-geometric-transformation": "1.0.0 <= v < 2.0.0",
-        "eeue56/elm-flat-matrix": "3.0.2 <= v < 4.0.0",
+        "eeue56/elm-flat-matrix": "4.0.0 <= v < 5.0.0",
         "elm-community/easing-functions": "1.0.2 <= v < 2.0.0",
         "elm-lang/animation-frame": "1.0.1 <= v < 2.0.0",
         "elm-lang/core": "5.0.0 <= v < 6.0.0",
