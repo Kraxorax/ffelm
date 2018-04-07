@@ -94,23 +94,24 @@ enlarge t d =
 
 
 ensmallen : Tabla -> Int -> Tabla
-ensmallen t d =
+ensmallen t delta =
     let
+        d = abs delta
         ts = Matrix.width t
-        rang = ts - 2 * d
-        r = if rang < 0 then 0 else rang
+        r = ts - 2 * d
 
         rng = Array.toList (Array.initialize r identity)
 
-        trimRow : Int -> List a -> List a
-        trimRow d row =
-            List.drop d row |> List.take r
-
-        l = List.map (\p -> Matrix.getRow (p+d) t |> Maybe.map (Array.toList >> trimRow d) |> Maybe.withDefault [] ) rng
+        l = List.map (\p -> Matrix.getRow (p+d) t |> Maybe.map (Array.toList >> trimList d) |> Maybe.withDefault [] ) rng
 
         m = Matrix.fromList l |> Maybe.withDefault t
     in
         m
+
+
+trimList : Int -> List a -> List a
+trimList d l =
+    List.drop d l |> List.take ((List.length l) - 2*d)
 
 
 numbOfZive : Int -> Int -> Tabla -> Int
