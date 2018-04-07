@@ -1,7 +1,6 @@
 module GejmOfLajf exposing (..)
 
 import Matrix exposing (..)
-import Matrix.Extra exposing (neighbours)
 import Random exposing (pair, list, int, generate, Generator)
 import Time exposing (Time)
 import Html exposing (..)
@@ -67,6 +66,15 @@ ozivi zivi boardSize =
 
 resize : Tabla -> Int -> Tabla
 resize t d =
+    if d > 0 
+        then enlarge t d
+    else if d < 0 
+        then ensmallen t (abs d)
+    else t
+
+
+enlarge : Tabla -> Int -> Tabla
+enlarge t d =
     let
         hsides = (repeat d (Matrix.height t)  Mrtva)
 
@@ -75,7 +83,7 @@ resize t d =
         nt1 = Maybe.withDefault t
             (concatHorizontal nt hsides)
 
-        vsides = (repeat (Matrix.width nt1) d Mrtva)  
+        vsides = (repeat (Matrix.width nt1) d Mrtva)
 
         nt2 = Maybe.withDefault t
             (concatVertical vsides nt1)
@@ -83,7 +91,26 @@ resize t d =
             (concatVertical nt2 vsides)
     in
         nt3
-        
+
+
+ensmallen : Tabla -> Int -> Tabla
+ensmallen t d =
+    let
+        ts = Matrix.width t
+        rang = ts - 2 * d
+        r = if rang < 0 then 0 else rang
+
+        rng = Array.toList (Array.initialize r identity)
+
+        trimRow : Int -> List a -> List a
+        trimRow d row =
+            List.drop d row |> List.take r
+
+        l = List.map (\p -> Matrix.getRow (p+d) t |> Maybe.map (Array.toList >> trimRow d) |> Maybe.withDefault [] ) rng
+
+        m = Matrix.fromList l |> Maybe.withDefault t
+    in
+        m
 
 
 numbOfZive : Int -> Int -> Tabla -> Int
@@ -286,7 +313,7 @@ view model =
                     button [ onClick (Zoom 1) ] [text "Zoom Out"]
                 ]
             ,   td [] [
-                    button [ onClick (Zoom -1), Html.Attributes.disabled True ] [text "Zoom In"]
+                    button [ onClick (Zoom -1) ] [text "Zoom In"]
                 ]
 
             ]
