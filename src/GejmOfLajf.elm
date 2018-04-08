@@ -14,7 +14,7 @@ defaultBoardSize : Int
 defaultBoardSize = 30
 
 
-boardPxWH : Int
+boardPxWH : Float
 boardPxWH = 700
 
 refreshTime : Float
@@ -31,6 +31,7 @@ type Msg
     | Reseed
     | Recreate (List(Int, Int))
     | Zoom Int
+    | Klik (Int, Int) Celija
 
 
 type alias Tabla =
@@ -102,7 +103,10 @@ ensmallen t delta =
 
         rng = Array.toList (Array.initialize r identity)
 
-        l = List.map (\p -> Matrix.getRow (p+d) t |> Maybe.map (Array.toList >> trimList d) |> Maybe.withDefault [] ) rng
+        l = List.map (\p -> Matrix.getRow (p+d) t 
+                            |> Maybe.map (Array.toList >> trimList d) 
+                            |> Maybe.withDefault []
+                    ) rng
 
         m = Matrix.fromList l |> Maybe.withDefault t
     in
@@ -187,6 +191,15 @@ isZiva c =
             False
 
 
+toggleCell : Celija -> Celija
+toggleCell c =
+    case c of
+        Ziva ->
+            Mrtva
+        Mrtva ->
+            Ziva
+
+
 tick : Time -> Model -> Model
 tick dt model =
     let
@@ -202,6 +215,7 @@ tick dt model =
             , clock = model.clock + dt
             , genNumb = gn
             , matrica = m }
+
 
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
@@ -226,30 +240,42 @@ update msg model =
                 |   matrica = resize model.matrica d
                 ,   boardSize = newBoardSize
                 } ! []
+        Klik (x, y) c ->
+            { model
+            | matrica = Matrix.indexedMap
+                (\cx cy c ->
+                    if (cx == x) && (cy == y) then
+                        toggleCell c
+                    else
+                        c
+                )
+                model.matrica
+            } ! []
 
 
-celToEle : Celija -> List ( String, String ) -> Html msg
-celToEle c pos =
+celToEle : Celija -> (Int, Int) -> List ( String, String ) -> Html Msg
+celToEle c (x, y) pos =
     div
         [ class ((toString c) ++ " celija")
         , style pos
+        , onClick (Klik (x, y) c)
         ]
         []
 
 
-cellSize : Int -> Int
+cellSize : Int -> Float
 cellSize boardSize =
-    boardPxWH // boardSize
+    boardPxWH / (toFloat boardSize)
 
 
-matrixToBoard : Int -> Int -> Int -> Celija -> Html msg
+matrixToBoard : Int -> Int -> Int -> Celija -> Html Msg
 matrixToBoard boardSize x y c  =
     let
         x_ =
-            x * (cellSize boardSize)
+            toFloat x * (cellSize boardSize)
 
         y_ =
-            y * (cellSize boardSize)
+            toFloat y * (cellSize boardSize)
 
         pos =
             [ ( "top", (toString y_) ++ "px" ), ( "left", (toString x_) ++ "px" ) ]
@@ -259,7 +285,8 @@ matrixToBoard boardSize x y c  =
             , ( "height", (toString (cellSize boardSize)) ++ "px" )
             ]
     in
-        celToEle c (pos ++ size)
+        celToEle c (x, y) (pos ++ size)
+
 
 istocifra: String -> String
 istocifra a =
@@ -302,24 +329,24 @@ view model =
                                 ++ ":" ++ (istocifra (toString model.counter))
                                 ++ "/" ++ (toString refreshTime))
                 ]
+            ,   td [] [ text ("size: " ++ (toString model.boardSize) ++ " ^2")
+                ]
             ]
         ,   tr [] [
                 td [] [
                     button [ onClick ToggleRunning ] [text (if not model.running then "START" else "STOP")]
                 ]
             ,   td [] [
-                    button [ onClick Reseed ] [text "RESTART"]
-                ]
-            ,   td [] [
                     button [ onClick (Zoom 1) ] [text "Zoom Out"]
+                ]
+            ]
+        ,   tr [] [
+               td [] [
+                    button [ onClick Reseed ] [text "RESTART"]
                 ]
             ,   td [] [
                     button [ onClick (Zoom -1) ] [text "Zoom In"]
                 ]
-
-            ]
-        ,   tr [] [
-                td [] []
             ]
         ]
     ]
