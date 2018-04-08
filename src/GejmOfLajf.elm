@@ -17,8 +17,8 @@ defaultBoardSize = 30
 boardPxWH : Float
 boardPxWH = 700
 
-refreshTime : Float
-refreshTime = 150
+defaultRefreshTime : Float
+defaultRefreshTime = 150
 
 type Celija
     = Ziva
@@ -31,8 +31,10 @@ type Msg
     | Reseed
     | Recreate (List(Int, Int))
     | Zoom Int
+    | KillAll
     | Klik (Int, Int) Celija
-
+    | Step
+    | Accelerate Float
 
 type alias Tabla =
     Matrix Celija
@@ -51,7 +53,8 @@ type alias Model =
 
 init : List ( Int, Int ) -> Model
 init zivi =
-    Model (ozivi zivi defaultBoardSize) defaultBoardSize 0 0 0 True refreshTime
+    Model (ozivi zivi defaultBoardSize) defaultBoardSize 0 0 0 True defaultRefreshTime
+
 
 ozivi : List (Int, Int) -> Int -> Matrix Celija
 ozivi zivi boardSize =
@@ -204,7 +207,7 @@ tick : Time -> Model -> Model
 tick dt model =
     let
         t = model.counter + dt
-        t1 = if t > refreshTime then 0 else t
+        t1 = if t > model.refreshTime then 0 else t
         m = if t1 == 0 then novoStanje model.matrica else model.matrica
         gn = if t1 == 0 then model.genNumb + 1 else model.genNumb
     in
@@ -216,6 +219,12 @@ tick dt model =
             , genNumb = gn
             , matrica = m }
 
+step : Model -> Model
+step m =
+    { m 
+    | matrica = novoStanje m.matrica
+    , genNumb = m.genNumb + 1
+    }
 
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
@@ -250,6 +259,17 @@ update msg model =
                         c
                 )
                 model.matrica
+            } ! []
+        KillAll ->
+            { model
+            | matrica = repeat model.boardSize model.boardSize Mrtva 
+            } ! []
+        Step ->
+            step model
+            ! []
+        Accelerate d ->
+            { model
+            | refreshTime = model.refreshTime + d 
             } ! []
 
 
@@ -288,10 +308,10 @@ matrixToBoard boardSize x y c  =
         celToEle c (x, y) (pos ++ size)
 
 
-istocifra: String -> String
-istocifra a =
+istocifra: String -> Float -> String
+istocifra a rt =
     let
-        pr = logBase 10 (refreshTime + 1) |> ceiling
+        pr = logBase 10 (rt + 1) |> ceiling
     in
         String.padLeft pr '0' a
 
@@ -326,8 +346,8 @@ view model =
     ,   table []
         [   tr [] [
                 td [] [ text ("gen: " ++ (toString model.genNumb)
-                                ++ ":" ++ (istocifra (toString model.counter))
-                                ++ "/" ++ (toString refreshTime))
+                                ++ ":" ++ (istocifra (toString model.counter) model.refreshTime)
+                                ++ "/" ++ (toString model.refreshTime))
                 ]
             ,   td [] [ text ("size: " ++ (toString model.boardSize) ++ " ^2")
                 ]
@@ -337,15 +357,27 @@ view model =
                     button [ onClick ToggleRunning ] [text (if not model.running then "START" else "STOP")]
                 ]
             ,   td [] [
+                button [ onClick Step ] [text "Step"]
+            ]
+            ,   td [] [
                     button [ onClick (Zoom 1) ] [text "Zoom Out"]
                 ]
             ]
         ,   tr [] [
                td [] [
-                    button [ onClick Reseed ] [text "RESTART"]
+                    button [ onClick KillAll ] [text "KILL ALL"]
                 ]
             ,   td [] [
+                    button [ onClick (Accelerate -25) ] [text "Spd +"]
+                ,   button [ onClick (Accelerate 25) ] [text "Spd -"]
+            ]
+            ,   td [] [
                     button [ onClick (Zoom -1) ] [text "Zoom In"]
+                ]
+            ]
+        ,   tr [] [
+               td [] [
+                    button [ onClick Reseed ] [text "RESEED"]
                 ]
             ]
         ]
