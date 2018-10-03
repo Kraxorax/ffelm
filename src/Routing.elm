@@ -1,41 +1,36 @@
 module Routing exposing (..)
 
-import UrlParser exposing (..)
-import Navigation
+import Url
+import Url.Parser exposing (Parser, parse, int, map, oneOf, s, top)
 
 
 type Route
     = Prva
-    | Druga Int
-    | GOL
+    | Druga
+    -- | GOL
+    -- | NotFoundRoute
 
 
-routeLocation : Navigation.Location -> Route
+routeLocation : Url.Url -> Route
 routeLocation =
     parseRoute >> routeFromResult
 
 
-parseRoute : Navigation.Location -> Maybe Route
+parseRoute : Url.Url -> Maybe Route
 parseRoute =
-    UrlParser.parseHash matchers
+    parse route
+
 
 
 routeFromResult : Maybe Route -> Route
 routeFromResult =
-    Maybe.withDefault Prva
+    Maybe.withDefault Druga
 
-
-matchers : Parser (Route -> a) a
-matchers =
+route : Parser (Route -> a) a
+route =
     oneOf
-        [ map GOL top
-        , map Prva (s "prva")
-        , map Druga (s "druga" </> int)
-        , map (Druga 0) (s "druga")
-        , map (\broj divlje -> Druga broj) (s "druga" </> int </> divlji)
+        -- [ map GOL (s "gol")
+        [ map Prva (s "prva")
+        , map Druga (s "druga")
         ]
 
-
-divlji : Parser (String -> a) a
-divlji =
-    custom "DIVLJI" Ok

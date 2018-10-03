@@ -33,7 +33,7 @@ view: Klok -> Html Msg
 view m =
   div []
     [ button [ onClick ( Dole m.id ) ] [ text "Dole" ]
-    , text (toString m.i)
+    , text (String.fromInt m.i)
     , button [ onClick ( Gore m.id ) ] [ text "Gore" ]
     , text (" - " ++ m.id)
     ]

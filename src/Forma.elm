@@ -1,11 +1,11 @@
 module Forma exposing (..)
 
 import Dugme
-import Color exposing (Color)
+import Color exposing (Color, toCssString)
+import ColorPicker exposing (hex2Color)
 import Html exposing (..)
 import Html.Attributes exposing (value)
 import Html.Events exposing (onInput, onSubmit)
-import Color.Convert exposing (hexToColor)
 
 
 submitDugme : Dugme.Dugme
@@ -26,7 +26,7 @@ type alias Model =
     , prvu : String
     , drugu : String
     , title : String
-    , parsd : Result String BojaForma
+    , parsd : Maybe BojaForma
     }
 
 
@@ -43,7 +43,7 @@ init a =
     , prvu = ""
     , drugu = ""
     , title = ""
-    , parsd = Err "Prazan Input"
+    , parsd = Nothing
     }
 
 
@@ -51,32 +51,32 @@ update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         SubmitDugme dmsg ->
-            { model
+            ({ model
                 | sdugme = Dugme.update dmsg model.sdugme
             }
-                ! []
+                , Cmd.none)
 
         SetPrva s ->
-            (parseForm { model | prvu = s }) ! []
+            ((parseForm { model | prvu = s }) , Cmd.none)
 
         SetDruga s ->
-            (parseForm { model | drugu = s }) ! []
+            ((parseForm { model | drugu = s }) , Cmd.none)
 
         SetTitle s ->
-            (parseForm { model | title = s }) ! []
+            ((parseForm { model | title = s }) , Cmd.none)
 
         Submit _ ->
-            (init 0) ! []
+            ((init 0) , Cmd.none)
 
 
 parseForm : Model -> Model
 parseForm model =
     let
         parsd =
-            Result.map3 BojaForma
-                (hexToColor model.prvu)
-                (hexToColor model.drugu)
-                (Ok model.title)
+            Maybe.map3 BojaForma
+                (hex2Color model.prvu)
+                (hex2Color model.drugu)
+                (Just model.title)
     in
         { model | parsd = parsd }
 
@@ -87,13 +87,7 @@ view model =
         dugme =
             Html.map SubmitDugme <| Dugme.view model.sdugme
 
-        frm =
-            case model.parsd of
-                Err _ ->
-                    Nothing
-
-                Ok f ->
-                    Just f
+        frm = model.parsd
     in
         form [ onSubmit (Submit frm) ]
             [ label []

@@ -102,7 +102,7 @@ update msg model =
 
         Klik id klik ->
             let
-                k =
+                ks =
                     model.klokovi
                         |> List.map
                             (\k ->
@@ -112,7 +112,7 @@ update msg model =
                                     k
                             )
             in
-                { model | klokovi = k }
+                { model | klokovi = ks }
 
 
 view : Model -> Html Msg

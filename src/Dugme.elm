@@ -1,9 +1,8 @@
 module Dugme exposing (..)
 
-import Color exposing (Color)
+import Color exposing (Color, toCssString)
 import Html exposing (..)
 import Html.Attributes exposing (style)
-import Color.Convert exposing (colorToHex)
 import Html.Events exposing (onMouseEnter, onMouseLeave, onClick)
 
 
@@ -53,7 +52,7 @@ toggleBoja b =
 view : Dugme -> Html Msg
 view dugme =
     button
-        [ style [ ( "background-color", (stringboje dugme) ) ]
+        [ style  "background-color" (stringboje dugme)
         , onMouseEnter PromeniDugme
         , onMouseLeave PromeniDugme
         , onClick Klick
@@ -73,4 +72,4 @@ bojaDugmeta d =
 
 stringboje : Dugme -> String
 stringboje =
-    bojaDugmeta >> colorToHex
+    bojaDugmeta >> toCssString >> \_-> "a"

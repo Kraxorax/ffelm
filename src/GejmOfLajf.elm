@@ -1,18 +1,16 @@
-module GejmOfLajf exposing (..)
+module GejmOfLajf exposing (Celija)
 
 import Matrix exposing (..)
 import Random exposing (pair, list, int, generate, Generator)
-import Time exposing (Time)
+import Time exposing (Posix)
 import Html exposing (..)
 import Html.Attributes exposing (class, style)
 import Html.Events exposing (onClick)
-import Array.Hamt as Array
 import Tuple
 
 
 defaultBoardSize : Int
 defaultBoardSize = 30
-
 
 boardPxWH : Float
 boardPxWH = 700
@@ -26,25 +24,25 @@ type Celija
 
 
 type Msg
-    = Tick Time
+    = Tick Posix
     | ToggleRunning
     | Reseed
     | Recreate (List(Int, Int))
     | Zoom Int
     | KillAll
     | Klik (Int, Int) Celija
-    | Step
+    | Step 
     | Accelerate Float
 
 type alias Tabla =
-    Matrix Celija
+    Matrix-- Celija
 
 
 type alias Model =
     { matrica : Tabla
     , boardSize: Int
-    , clock : Time
-    , counter : Time
+    , clock : Posix
+    , counter : Posix
     , genNumb : Int
     , running : Bool
     , refreshTime: Float
