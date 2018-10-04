@@ -1,4 +1,4 @@
-module GejmOfLajf exposing (Celija)
+module GejmOfLajf exposing (..)
 
 import Matrix exposing (..)
 import Random exposing (pair, list, int, generate, Generator)
@@ -34,8 +34,10 @@ type Msg
     | Step 
     | Accelerate Float
 
+
+
 type alias Tabla =
-    Matrix-- Celija
+    Matrix Celija
 
 
 type alias Model =
@@ -51,7 +53,14 @@ type alias Model =
 
 init : List ( Int, Int ) -> Model
 init zivi =
-    Model (ozivi zivi defaultBoardSize) defaultBoardSize 0 0 0 True defaultRefreshTime
+    Model 
+        (ozivi zivi defaultBoardSize) 
+        defaultBoardSize 
+        (Time.millisToPosix 0) 
+        (Time.millisToPosix 0) 
+        0 
+        True 
+        defaultRefreshTime
 
 
 ozivi : List (Int, Int) -> Int -> Matrix Celija
@@ -78,14 +87,14 @@ resize t d =
 enlarge : Tabla -> Int -> Tabla
 enlarge t d =
     let
-        hsides = (repeat d (Matrix.height t)  Mrtva)
+        hsides = (repeat d (matrixHeight t)  Mrtva)
 
         nt = Maybe.withDefault t
             (concatHorizontal hsides t)
         nt1 = Maybe.withDefault t
             (concatHorizontal nt hsides)
 
-        vsides = (repeat (Matrix.width nt1) d Mrtva)
+        vsides = (repeat (matrixWidth nt1) d Mrtva)
 
         nt2 = Maybe.withDefault t
             (concatVertical vsides nt1)
@@ -99,17 +108,17 @@ ensmallen : Tabla -> Int -> Tabla
 ensmallen t delta =
     let
         d = abs delta
-        ts = Matrix.width t
+        ts = matrixWidth t
         r = ts - 2 * d
 
-        rng = Array.toList (Array.initialize r identity)
+        rng = List.repeat r r
 
         l = List.map (\p -> Matrix.getRow (p+d) t 
-                            |> Maybe.map (Array.toList >> trimList d) 
+                            |> Maybe.map (trimList d)
                             |> Maybe.withDefault []
                     ) rng
 
-        m = Matrix.fromList l |> Maybe.withDefault t
+        m = l -- Matrix.fromList l |> Maybe.withDefault t
     in
         m
 
@@ -127,8 +136,8 @@ numbOfZive x y t =
 okoloTorus : Int -> Int -> Tabla -> List Celija
 okoloTorus x y t =
     let
-        mx = Matrix.height t
-        my = Matrix.width t
+        mx = matrixHeight t
+        my = matrixWidth t
 
         locs =  [   (-1, -1), (0, -1), (1, -1)
                 ,   (-1,  0),          (1,  0)
@@ -143,7 +152,7 @@ okoloTorus x y t =
                 xn = modulo (dx + x) mx
                 yn = modulo (dy + y) my
 
-                n = Maybe.withDefault Mrtva (Matrix.get xn yn t)
+                n = Maybe.withDefault Mrtva (matrixGet xn yn t)
             in
                 n
             ) locs
@@ -201,19 +210,20 @@ toggleCell c =
             Ziva
 
 
-tick : Time -> Model -> Model
+tick : Posix -> Model -> Model
 tick dt model =
     let
-        t = model.counter + dt
-        t1 = if t > model.refreshTime then 0 else t
+        t = (Time.posixToMillis model.counter) + (Time.posixToMillis dt)
+        t1 = if (toFloat t) > model.refreshTime then 0 else t
         m = if t1 == 0 then novoStanje model.matrica else model.matrica
         gn = if t1 == 0 then model.genNumb + 1 else model.genNumb
     in
         if not model.running then model
         else
         { model
-            | counter = t1
-            , clock = model.clock + dt
+            | counter = Time.millisToPosix t1
+            -- lol @ Posix
+            , clock = Time.millisToPosix ((Time.posixToMillis model.clock) + (Time.posixToMillis dt))
             , genNumb = gn
             , matrica = m }
 
@@ -228,28 +238,28 @@ update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
     case msg of
         ToggleRunning ->
-            { model | running = not model.running } ! []
+            ({ model | running = not model.running } , Cmd.none)
         Tick t ->
-            tick t model ! []
+            (tick t model , Cmd.none)
         Reseed ->
-            model ! [generate Recreate (randomBrojevi model.boardSize)]
+            (model , generate Recreate (randomBrojevi model.boardSize))
         Recreate zivi ->
-            {   model
+            ({   model
             |   matrica = ozivi zivi model.boardSize
             ,   genNumb = 0
-            ,   counter = 0
-            } ! []
+            ,   counter = Time.millisToPosix 0
+            } , Cmd.none)
         Zoom d ->
             let
                 newBoardSize = model.boardSize + d * 2
             in
-                {   model
+                ({   model
                 |   matrica = resize model.matrica d
                 ,   boardSize = newBoardSize
-                } ! []
-        Klik (x, y) c ->
-            { model
-            | matrica = Matrix.indexedMap
+                } , Cmd.none)
+        Klik (x, y) cl ->
+            ({ model
+            | matrica = indexedMap
                 (\cx cy c ->
                     if (cx == x) && (cy == y) then
                         toggleCell c
@@ -257,28 +267,38 @@ update msg model =
                         c
                 )
                 model.matrica
-            } ! []
+            } , Cmd.none)
         KillAll ->
-            { model
+            ({ model
             | matrica = repeat model.boardSize model.boardSize Mrtva 
-            } ! []
+            } , Cmd.none)
         Step ->
-            step model
-            ! []
+            (step model
+            , Cmd.none)
         Accelerate d ->
-            { model
+            ({ model
             | refreshTime = model.refreshTime + d 
-            } ! []
+            } , Cmd.none)
 
 
-celToEle : Celija -> (Int, Int) -> List ( String, String ) -> Html Msg
+celToString : Celija -> String
+celToString cel =
+    case cel of
+        Mrtva -> "Mrtva"
+        Ziva -> "Ziva"
+
+celToEle : Celija -> (Int, Int) -> List ( Html.Attribute Msg ) -> Html Msg
 celToEle c (x, y) pos =
-    div
-        [ class ((toString c) ++ " celija")
-        , style pos
-        , onClick (Klik (x, y) c)
-        ]
-        []
+    let
+        attrs = List.append
+            [ class ((celToString c) ++ " celija")
+            , onClick (Klik (x, y) c)
+            ]
+            pos
+    in
+    
+        div attrs
+            []
 
 
 cellSize : Int -> Float
@@ -296,14 +316,14 @@ matrixToBoard boardSize x y c  =
             toFloat y * (cellSize boardSize)
 
         pos =
-            [ ( "top", (toString y_) ++ "px" ), ( "left", (toString x_) ++ "px" ) ]
+            [ style  "top" ((String.fromFloat y_) ++ "px") , style "left" ((String.fromFloat x_) ++ "px" ) ]
 
         size =
-            [ ( "width", (toString (cellSize boardSize)) ++ "px" )
-            , ( "height", (toString (cellSize boardSize)) ++ "px" )
+            [ style "width" ((String.fromFloat (cellSize boardSize)) ++ "px" )
+            , style "height" ((String.fromFloat (cellSize boardSize)) ++ "px" )
             ]
     in
-        celToEle c (x, y) (pos ++ size)
+        celToEle c (x, y) (List.append pos size)
 
 
 istocifra: String -> Float -> String
@@ -322,32 +342,32 @@ randomBrojevi boardSize =
 
 view : Model -> Html Msg
 view model =
-    let
-        board = (indexedMap
-                (matrixToBoard model.boardSize)
-                model.matrica
-            )
-            |> toIndexedArray
+    -- let
+    --     board = (indexedMap
+    --             (matrixToBoard model.boardSize)
+    --             model.matrica
+    --         )
+    --         |> toIndexedArray
     
-    in
+    -- in
         
     div []
     [   div [ class "board" ]
             ((indexedMap
                 (matrixToBoard model.boardSize)
                 model.matrica
-            )
-                |> toIndexedArray
-                |> Array.map (\((_),c) -> c)
-                |> Array.toList
+            )   |> Matrix.toList
+                -- |> toIndexedArray
+                -- |> Array.map (\((_),c) -> c)
+                -- |> Array.toList
             )
     ,   table []
         [   tr [] [
-                td [] [ text ("gen: " ++ (toString model.genNumb)
-                                ++ ":" ++ (istocifra (toString model.counter) model.refreshTime)
-                                ++ "/" ++ (toString model.refreshTime))
+                td [] [ text ("gen: " ++ (String.fromInt model.genNumb)
+                                ++ ":" ++ (istocifra (String.fromInt (Time.posixToMillis model.counter)) model.refreshTime)
+                                ++ "/" ++ (String.fromFloat model.refreshTime))
                 ]
-            ,   td [] [ text ("size: " ++ (toString model.boardSize) ++ " ^2")
+            ,   td [] [ text ("size: " ++ (String.fromInt model.boardSize) ++ " ^2")
                 ]
             ]
         ,   tr [] [

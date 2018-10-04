@@ -14,7 +14,6 @@
             "elm/time": "1.0.0",
             "elm/url": "1.0.0",
             "mgold/elm-animation": "2.0.0",
-            "ryry0/elm-numeric": "1.0.0",
             "simonh1000/elm-colorpicker": "1.1.3"
         },
         "indirect": {

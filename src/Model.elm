@@ -5,11 +5,13 @@ import Forma
 import Klok
 import Klokotalo
 import Routing exposing (Route)
--- import GejmOfLajf
+import Browser.Navigation exposing (Key)
+import GejmOfLajf
 
 
 type alias Model =
-    { dugmici : List Dugme
+    { navKey : Key 
+    , dugmici : List Dugme
     , naziv : Maybe String
     , formica : Forma.Model
     , klok : Klok.Klok
@@ -17,5 +19,5 @@ type alias Model =
     , route : Route
     , clock : Float
     , counter : Float
-    -- , gol : GejmOfLajf.Model
+    , gol : GejmOfLajf.Model
     }
