@@ -4506,12 +4506,20 @@ var elm$core$Maybe$Nothing = {$: 'Nothing'};
 var author$project$Forma$init = function (a) {
 	return {drugu: '', parsd: elm$core$Maybe$Nothing, prvu: '', sdugme: author$project$Forma$submitDugme, title: ''};
 };
-var author$project$GejmOfLajf$defaultBoardSize = 30;
-var author$project$GejmOfLajf$Model = F7(
-	function (matrica, boardSize, clock, counter, genNumb, running, refreshTime) {
-		return {boardSize: boardSize, clock: clock, counter: counter, genNumb: genNumb, matrica: matrica, refreshTime: refreshTime, running: running};
+var author$project$GejmOfLajf$defaultBoardSize = 10;
+var author$project$GejmOfLajf$Model = F8(
+	function (matrica, boardSize, clock, counter, genNumb, running, refreshTime, topology) {
+		return {boardSize: boardSize, clock: clock, counter: counter, genNumb: genNumb, matrica: matrica, refreshTime: refreshTime, running: running, topology: topology};
 	});
-var author$project$GejmOfLajf$defaultRefreshTime = 150;
+var author$project$GejmOfLajf$defaultRefreshTime = 30;
+var author$project$GejmOfLajf$flyer = _List_fromArray(
+	[
+		_Utils_Tuple2(5, 5),
+		_Utils_Tuple2(6, 5),
+		_Utils_Tuple2(7, 5),
+		_Utils_Tuple2(7, 6),
+		_Utils_Tuple2(6, 7)
+	]);
 var author$project$GejmOfLajf$Mrtva = {$: 'Mrtva'};
 var author$project$GejmOfLajf$Ziva = {$: 'Ziva'};
 var elm$core$Basics$sub = _Basics_sub;
@@ -4582,16 +4590,21 @@ var elm$core$List$indexedMap = F2(
 var author$project$Matrix$indexedMap = function (f) {
 	return elm$core$List$indexedMap(
 		F2(
-			function (x, row) {
+			function (y, row) {
 				return A2(
 					elm$core$List$indexedMap,
 					F2(
-						function (y, ele) {
+						function (x, ele) {
 							return A3(f, x, y, ele);
 						}),
 					row);
 			}));
 };
+var elm$core$Basics$composeR = F3(
+	function (f, g, x) {
+		return g(
+			f(x));
+	});
 var elm$core$List$repeatHelp = F3(
 	function (result, n, value) {
 		repeatHelp:
@@ -4613,12 +4626,12 @@ var elm$core$List$repeat = F2(
 	function (n, value) {
 		return A3(elm$core$List$repeatHelp, _List_Nil, n, value);
 	});
-var author$project$Matrix$repeat = F3(
-	function (w, h, a) {
+var author$project$Matrix$repeat = F2(
+	function (w, h) {
 		return A2(
-			elm$core$List$repeat,
-			h,
-			A2(elm$core$List$repeat, w, a));
+			elm$core$Basics$composeR,
+			elm$core$List$repeat(w),
+			elm$core$List$repeat(h));
 	});
 var elm$core$Basics$apR = F2(
 	function (x, f) {
@@ -4670,23 +4683,18 @@ var author$project$GejmOfLajf$ozivi = F2(
 				}),
 			A3(author$project$Matrix$repeat, boardSize, boardSize, author$project$GejmOfLajf$Mrtva));
 	});
-var elm$core$Basics$identity = function (x) {
-	return x;
-};
-var elm$time$Time$Posix = function (a) {
-	return {$: 'Posix', a: a};
-};
-var elm$time$Time$millisToPosix = elm$time$Time$Posix;
+var author$project$Matrix$Torus = {$: 'Torus'};
 var author$project$GejmOfLajf$init = function (zivi) {
-	return A7(
+	return A8(
 		author$project$GejmOfLajf$Model,
-		A2(author$project$GejmOfLajf$ozivi, zivi, author$project$GejmOfLajf$defaultBoardSize),
+		A2(author$project$GejmOfLajf$ozivi, author$project$GejmOfLajf$flyer, author$project$GejmOfLajf$defaultBoardSize),
 		author$project$GejmOfLajf$defaultBoardSize,
-		elm$time$Time$millisToPosix(0),
-		elm$time$Time$millisToPosix(0),
+		0,
+		0,
 		0,
 		true,
-		author$project$GejmOfLajf$defaultRefreshTime);
+		author$project$GejmOfLajf$defaultRefreshTime,
+		author$project$Matrix$Torus);
 };
 var elm$core$Basics$apL = F2(
 	function (f, x) {
@@ -4695,6 +4703,9 @@ var elm$core$Basics$apL = F2(
 var elm$core$Basics$floor = _Basics_floor;
 var elm$core$Basics$pow = _Basics_pow;
 var elm$core$Basics$toFloat = _Basics_toFloat;
+var elm$core$Basics$identity = function (x) {
+	return x;
+};
 var elm$core$Basics$lt = _Utils_lt;
 var elm$core$Basics$negate = function (n) {
 	return -n;
@@ -5686,11 +5697,6 @@ var elm$core$Maybe$withDefault = F2(
 		}
 	});
 var author$project$Routing$routeFromResult = elm$core$Maybe$withDefault(author$project$Routing$Druga);
-var elm$core$Basics$composeR = F3(
-	function (f, g, x) {
-		return g(
-			f(x));
-	});
 var author$project$Routing$routeLocation = A2(elm$core$Basics$composeR, author$project$Routing$parseRoute, author$project$Routing$routeFromResult);
 var avh4$elm_color$Color$darkGray = A4(avh4$elm_color$Color$RgbaSpace, 186 / 255, 189 / 255, 182 / 255, 1.0);
 var avh4$elm_color$Color$green = A4(avh4$elm_color$Color$RgbaSpace, 115 / 255, 210 / 255, 22 / 255, 1.0);
@@ -5721,6 +5727,10 @@ var elm$time$Time$Zone = F2(
 		return {$: 'Zone', a: a, b: b};
 	});
 var elm$time$Time$customZone = elm$time$Time$Zone;
+var elm$time$Time$Posix = function (a) {
+	return {$: 'Posix', a: a};
+};
+var elm$time$Time$millisToPosix = elm$time$Time$Posix;
 var elm$time$Time$now = _Time_now(elm$time$Time$millisToPosix);
 var elm$time$Time$posixToMillis = function (_n0) {
 	var millis = _n0.a;
@@ -6877,159 +6887,6 @@ var author$project$GejmOfLajf$isZiva = function (c) {
 	}
 };
 var elm$core$Basics$ge = _Utils_ge;
-var author$project$GejmOfLajf$modulo = F2(
-	function (a, m) {
-		return (a < 0) ? (m + a) : ((_Utils_cmp(a, m) > -1) ? (m - a) : a);
-	});
-var elm$core$List$head = function (list) {
-	if (list.b) {
-		var x = list.a;
-		var xs = list.b;
-		return elm$core$Maybe$Just(x);
-	} else {
-		return elm$core$Maybe$Nothing;
-	}
-};
-var author$project$Matrix$matrixGet = F3(
-	function (x, y, m) {
-		return elm$core$List$head(
-			A2(
-				elm$core$Maybe$withDefault,
-				_List_Nil,
-				elm$core$List$head(m)));
-	});
-var author$project$Matrix$matrixHeight = function (m) {
-	return 1;
-};
-var author$project$Matrix$matrixWidth = function (m) {
-	return 1;
-};
-var elm$core$Tuple$second = function (_n0) {
-	var y = _n0.b;
-	return y;
-};
-var author$project$GejmOfLajf$okoloTorus = F3(
-	function (x, y, t) {
-		var my = author$project$Matrix$matrixWidth(t);
-		var mx = author$project$Matrix$matrixHeight(t);
-		var locs = _List_fromArray(
-			[
-				_Utils_Tuple2(-1, -1),
-				_Utils_Tuple2(0, -1),
-				_Utils_Tuple2(1, -1),
-				_Utils_Tuple2(-1, 0),
-				_Utils_Tuple2(1, 0),
-				_Utils_Tuple2(-1, 1),
-				_Utils_Tuple2(0, 1),
-				_Utils_Tuple2(1, 1)
-			]);
-		var l = A2(
-			elm$core$List$map,
-			function (pos) {
-				var dy = pos.b;
-				var yn = A2(author$project$GejmOfLajf$modulo, dy + y, my);
-				var dx = pos.a;
-				var xn = A2(author$project$GejmOfLajf$modulo, dx + x, mx);
-				var n = A2(
-					elm$core$Maybe$withDefault,
-					author$project$GejmOfLajf$Mrtva,
-					A3(author$project$Matrix$matrixGet, xn, yn, t));
-				return n;
-			},
-			locs);
-		return l;
-	});
-var elm$core$List$filter = F2(
-	function (isGood, list) {
-		return A3(
-			elm$core$List$foldr,
-			F2(
-				function (x, xs) {
-					return isGood(x) ? A2(elm$core$List$cons, x, xs) : xs;
-				}),
-			_List_Nil,
-			list);
-	});
-var author$project$GejmOfLajf$numbOfZive = F3(
-	function (x, y, t) {
-		return elm$core$List$length(
-			A2(
-				elm$core$List$filter,
-				author$project$GejmOfLajf$isZiva,
-				A3(author$project$GejmOfLajf$okoloTorus, x, y, t)));
-	});
-var author$project$GejmOfLajf$survival = F2(
-	function (komsije, celija) {
-		return (komsije < 2) ? author$project$GejmOfLajf$Mrtva : ((komsije === 2) ? celija : ((komsije === 3) ? author$project$GejmOfLajf$Ziva : author$project$GejmOfLajf$Mrtva));
-	});
-var author$project$GejmOfLajf$novoStanje = function (t) {
-	return A2(
-		author$project$Matrix$indexedMap,
-		F3(
-			function (x, y, c) {
-				var komsije = A3(author$project$GejmOfLajf$numbOfZive, x, y, t);
-				return A2(author$project$GejmOfLajf$survival, komsije, c);
-			}),
-		t);
-};
-var elm$core$Basics$not = _Basics_not;
-var author$project$GejmOfLajf$tick = F2(
-	function (dt, model) {
-		var t = elm$time$Time$posixToMillis(model.counter) + elm$time$Time$posixToMillis(dt);
-		var t1 = (_Utils_cmp(t, model.refreshTime) > 0) ? 0 : t;
-		var m = (!t1) ? author$project$GejmOfLajf$novoStanje(model.matrica) : model.matrica;
-		var gn = (!t1) ? (model.genNumb + 1) : model.genNumb;
-		return (!model.running) ? model : _Utils_update(
-			model,
-			{
-				clock: elm$time$Time$millisToPosix(
-					elm$time$Time$posixToMillis(model.clock) + elm$time$Time$posixToMillis(dt)),
-				counter: elm$time$Time$millisToPosix(t1),
-				genNumb: gn,
-				matrica: m
-			});
-	});
-var author$project$GejmOfLajf$Recreate = function (a) {
-	return {$: 'Recreate', a: a};
-};
-var author$project$Matrix$concatHorizontal = F2(
-	function (m, n) {
-		return elm$core$Maybe$Just(m);
-	});
-var author$project$Matrix$concatVertical = F2(
-	function (m, n) {
-		return elm$core$Maybe$Just(m);
-	});
-var author$project$GejmOfLajf$enlarge = F2(
-	function (t, d) {
-		var hsides = A3(
-			author$project$Matrix$repeat,
-			d,
-			author$project$Matrix$matrixHeight(t),
-			author$project$GejmOfLajf$Mrtva);
-		var nt = A2(
-			elm$core$Maybe$withDefault,
-			t,
-			A2(author$project$Matrix$concatHorizontal, hsides, t));
-		var nt1 = A2(
-			elm$core$Maybe$withDefault,
-			t,
-			A2(author$project$Matrix$concatHorizontal, nt, hsides));
-		var vsides = A3(
-			author$project$Matrix$repeat,
-			author$project$Matrix$matrixWidth(nt1),
-			d,
-			author$project$GejmOfLajf$Mrtva);
-		var nt2 = A2(
-			elm$core$Maybe$withDefault,
-			t,
-			A2(author$project$Matrix$concatVertical, vsides, nt1));
-		var nt3 = A2(
-			elm$core$Maybe$withDefault,
-			nt2,
-			A2(author$project$Matrix$concatVertical, nt2, vsides));
-		return nt3;
-	});
 var elm$core$List$drop = F2(
 	function (n, list) {
 		drop:
@@ -7050,6 +6907,28 @@ var elm$core$List$drop = F2(
 				}
 			}
 		}
+	});
+var elm$core$List$head = function (list) {
+	if (list.b) {
+		var x = list.a;
+		var xs = list.b;
+		return elm$core$Maybe$Just(x);
+	} else {
+		return elm$core$Maybe$Nothing;
+	}
+};
+var author$project$Matrix$getRow = function (y) {
+	return (y >= 0) ? A2(
+		elm$core$Basics$composeR,
+		elm$core$List$drop(y),
+		elm$core$List$head) : function (_n0) {
+		return elm$core$Maybe$Nothing;
+	};
+};
+var author$project$Matrix$height = elm$core$List$length;
+var author$project$Matrix$modulo = F2(
+	function (a, m) {
+		return (a < 0) ? (m + a) : ((_Utils_cmp(a, m) > -1) ? (m - a) : a);
 	});
 var elm$core$List$takeReverse = F3(
 	function (n, list, kept) {
@@ -7177,20 +7056,320 @@ var elm$core$List$take = F2(
 	function (n, list) {
 		return A3(elm$core$List$takeFast, 0, n, list);
 	});
+var author$project$Matrix$unboundHorizontalCenter = F3(
+	function (start, end, l) {
+		return A2(
+			elm$core$List$append,
+			A2(
+				elm$core$List$take,
+				1,
+				A2(elm$core$List$drop, end, l)),
+			A2(
+				elm$core$List$take,
+				1,
+				A2(elm$core$List$drop, start, l)));
+	});
+var author$project$Matrix$unboundHorizontalSide = F3(
+	function (start, end, l) {
+		return (_Utils_cmp(end, start) < 0) ? A2(
+			elm$core$List$append,
+			A2(
+				elm$core$List$take,
+				3,
+				A2(elm$core$List$drop, start, l)),
+			A2(elm$core$List$take, end + 1, l)) : A2(
+			elm$core$List$take,
+			3,
+			A2(elm$core$List$drop, start, l));
+	});
+var author$project$Matrix$width = A2(
+	elm$core$Basics$composeR,
+	elm$core$List$head,
+	A2(
+		elm$core$Basics$composeR,
+		elm$core$Maybe$withDefault(_List_Nil),
+		elm$core$List$length));
+var author$project$Matrix$neigbursOnHorizontalStrip = F3(
+	function (x, y, m) {
+		var rowSides = A2(
+			elm$core$List$map,
+			elm$core$Maybe$withDefault(_List_Nil),
+			A2(
+				elm$core$List$cons,
+				A2(author$project$Matrix$getRow, y - 1, m),
+				_List_fromArray(
+					[
+						A2(author$project$Matrix$getRow, y + 1, m)
+					])));
+		var rowCenter = A2(
+			elm$core$Maybe$withDefault,
+			_List_Nil,
+			A2(author$project$Matrix$getRow, y, m));
+		var mw = author$project$Matrix$width(m);
+		var start = A2(author$project$Matrix$modulo, x - 1, mw);
+		var mh = author$project$Matrix$height(m);
+		var end = A2(author$project$Matrix$modulo, x + 1, mw);
+		return A2(
+			elm$core$List$append,
+			elm$core$List$concat(
+				A2(
+					elm$core$List$map,
+					A2(author$project$Matrix$unboundHorizontalSide, start, end),
+					rowSides)),
+			A3(author$project$Matrix$unboundHorizontalCenter, start, end, rowCenter));
+	});
+var author$project$Matrix$boundHorizontalCenter = F3(
+	function (start, end, l) {
+		return (start < 0) ? A2(
+			elm$core$List$take,
+			1,
+			A2(elm$core$List$drop, end, l)) : A2(
+			elm$core$List$append,
+			A2(
+				elm$core$List$take,
+				1,
+				A2(elm$core$List$drop, end, l)),
+			A2(
+				elm$core$List$take,
+				1,
+				A2(elm$core$List$drop, start, l)));
+	});
+var author$project$Matrix$boundHorizontalSide = F3(
+	function (start, toTake, l) {
+		return A2(
+			elm$core$List$take,
+			toTake,
+			A2(elm$core$List$drop, start, l));
+	});
+var author$project$Matrix$neigbursOnVerticalStrip = F3(
+	function (x, y, m) {
+		var startRow = A2(elm$core$Basics$max, y - 1, 0);
+		var start = x - 1;
+		var r2 = A2(
+			elm$core$Maybe$withDefault,
+			_List_Nil,
+			A2(author$project$Matrix$getRow, y, m));
+		var numToTakeRows = ((y - 1) < 0) ? (3 + (y - 1)) : 3;
+		var rows = A2(
+			elm$core$List$take,
+			numToTakeRows,
+			A2(elm$core$List$drop, startRow, m));
+		var numToTakeCells = (start < 0) ? (3 + start) : 3;
+		var mw = author$project$Matrix$width(m);
+		var mh = author$project$Matrix$height(m);
+		var r1 = A2(
+			elm$core$Maybe$withDefault,
+			_List_Nil,
+			A2(
+				author$project$Matrix$getRow,
+				A2(author$project$Matrix$modulo, y - 1, mh),
+				m));
+		var r3 = A2(
+			elm$core$Maybe$withDefault,
+			_List_Nil,
+			A2(
+				author$project$Matrix$getRow,
+				A2(author$project$Matrix$modulo, y + 1, mh),
+				m));
+		var end = x + 1;
+		return elm$core$List$concat(
+			A2(
+				elm$core$List$append,
+				A3(
+					author$project$Matrix$boundHorizontalCenter,
+					start,
+					end,
+					_List_fromArray(
+						[r2])),
+				A2(
+					elm$core$List$map,
+					function (row) {
+						return A3(author$project$Matrix$boundHorizontalSide, start, end, row);
+					},
+					A2(
+						elm$core$List$cons,
+						r1,
+						A2(elm$core$List$cons, r3, _List_Nil)))));
+	});
+var author$project$Matrix$neighboursOnPlane = F3(
+	function (x, y, m) {
+		var startRow = A2(elm$core$Basics$max, y - 1, 0);
+		var start = x - 1;
+		var numToTakeRows = ((y - 1) < 0) ? (3 + (y - 1)) : 3;
+		var rows = A2(
+			elm$core$List$take,
+			numToTakeRows,
+			A2(elm$core$List$drop, startRow, m));
+		var numToTakeCells = (start < 0) ? (3 + start) : 3;
+		var end = x + 1;
+		return elm$core$List$concat(
+			A2(
+				elm$core$List$indexedMap,
+				F2(
+					function (yc, row) {
+						return _Utils_eq(startRow + yc, y) ? A3(author$project$Matrix$boundHorizontalCenter, start, end, row) : A3(author$project$Matrix$boundHorizontalSide, start, end, row);
+					}),
+				rows));
+	});
+var author$project$Matrix$neighboursOnTorus = F3(
+	function (x, y, m) {
+		var r2 = A2(
+			elm$core$Maybe$withDefault,
+			_List_Nil,
+			A2(author$project$Matrix$getRow, y, m));
+		var mw = author$project$Matrix$width(m);
+		var start = A2(author$project$Matrix$modulo, x - 1, mw);
+		var mh = author$project$Matrix$height(m);
+		var r1 = A2(
+			elm$core$Maybe$withDefault,
+			_List_Nil,
+			A2(
+				author$project$Matrix$getRow,
+				A2(author$project$Matrix$modulo, y - 1, mh),
+				m));
+		var r3 = A2(
+			elm$core$Maybe$withDefault,
+			_List_Nil,
+			A2(
+				author$project$Matrix$getRow,
+				A2(author$project$Matrix$modulo, y + 1, mh),
+				m));
+		var end = A2(author$project$Matrix$modulo, x + 1, mw);
+		return A2(
+			elm$core$List$append,
+			A3(author$project$Matrix$unboundHorizontalSide, start, end, r3),
+			A2(
+				elm$core$List$append,
+				A3(author$project$Matrix$unboundHorizontalCenter, start, end, r2),
+				A3(author$project$Matrix$unboundHorizontalSide, start, end, r1)));
+	});
+var author$project$Matrix$neighbours = function (mt) {
+	switch (mt.$) {
+		case 'Plane':
+			return author$project$Matrix$neighboursOnPlane;
+		case 'Torus':
+			return author$project$Matrix$neighboursOnTorus;
+		case 'StripVertical':
+			return author$project$Matrix$neigbursOnVerticalStrip;
+		default:
+			return author$project$Matrix$neigbursOnHorizontalStrip;
+	}
+};
+var elm$core$List$filter = F2(
+	function (isGood, list) {
+		return A3(
+			elm$core$List$foldr,
+			F2(
+				function (x, xs) {
+					return isGood(x) ? A2(elm$core$List$cons, x, xs) : xs;
+				}),
+			_List_Nil,
+			list);
+	});
+var author$project$GejmOfLajf$numbOfZive = F3(
+	function (x, y, m) {
+		return elm$core$List$length(
+			A2(
+				elm$core$List$filter,
+				author$project$GejmOfLajf$isZiva,
+				A4(author$project$Matrix$neighbours, m.topology, x, y, m.matrica)));
+	});
+var author$project$GejmOfLajf$survival = F2(
+	function (komsije, celija) {
+		return (komsije < 2) ? author$project$GejmOfLajf$Mrtva : ((komsije === 2) ? celija : ((komsije === 3) ? author$project$GejmOfLajf$Ziva : author$project$GejmOfLajf$Mrtva));
+	});
+var author$project$GejmOfLajf$novoStanje = function (m) {
+	return A2(
+		author$project$Matrix$indexedMap,
+		F3(
+			function (x, y, c) {
+				var komsije = A3(author$project$GejmOfLajf$numbOfZive, x, y, m);
+				return A2(author$project$GejmOfLajf$survival, komsije, c);
+			}),
+		m.matrica);
+};
+var elm$core$Basics$not = _Basics_not;
+var elm$core$Basics$round = _Basics_round;
+var author$project$GejmOfLajf$tick = F2(
+	function (dt, model) {
+		var t = model.counter + dt;
+		var t1 = (_Utils_cmp(t, model.refreshTime) > 0) ? 0 : t;
+		var m = (!t1) ? author$project$GejmOfLajf$novoStanje(model) : model.matrica;
+		var gn = (!t1) ? (model.genNumb + 1) : model.genNumb;
+		return (!model.running) ? model : _Utils_update(
+			model,
+			{
+				clock: model.clock + elm$core$Basics$round(dt),
+				counter: elm$core$Basics$round(t1),
+				genNumb: gn,
+				matrica: m
+			});
+	});
+var author$project$GejmOfLajf$Recreate = function (a) {
+	return {$: 'Recreate', a: a};
+};
+var author$project$Matrix$concatHorizontal = F2(
+	function (m, n) {
+		return _Utils_eq(
+			author$project$Matrix$height(m),
+			author$project$Matrix$height(n)) ? elm$core$Maybe$Just(
+			A2(
+				elm$core$List$indexedMap,
+				F2(
+					function (i, mrow) {
+						return A2(
+							elm$core$List$append,
+							mrow,
+							A2(
+								elm$core$Maybe$withDefault,
+								_List_Nil,
+								A2(author$project$Matrix$getRow, i, n)));
+					}),
+				m)) : elm$core$Maybe$Nothing;
+	});
+var author$project$Matrix$concatVertical = F2(
+	function (m, n) {
+		return _Utils_eq(
+			author$project$Matrix$width(m),
+			author$project$Matrix$width(n)) ? elm$core$Maybe$Just(
+			A2(elm$core$List$append, m, n)) : elm$core$Maybe$Nothing;
+	});
+var author$project$GejmOfLajf$enlarge = F2(
+	function (t, d) {
+		var hsides = A3(
+			author$project$Matrix$repeat,
+			d,
+			author$project$Matrix$height(t),
+			author$project$GejmOfLajf$Mrtva);
+		var nt = A2(
+			elm$core$Maybe$withDefault,
+			t,
+			A2(author$project$Matrix$concatHorizontal, hsides, t));
+		var nt1 = A2(
+			elm$core$Maybe$withDefault,
+			t,
+			A2(author$project$Matrix$concatHorizontal, nt, hsides));
+		var vsides = A3(
+			author$project$Matrix$repeat,
+			author$project$Matrix$width(nt1),
+			d,
+			author$project$GejmOfLajf$Mrtva);
+		var nt2 = A2(
+			elm$core$Maybe$withDefault,
+			t,
+			A2(author$project$Matrix$concatVertical, vsides, nt1));
+		var nt3 = A2(
+			elm$core$Maybe$withDefault,
+			nt2,
+			A2(author$project$Matrix$concatVertical, nt2, vsides));
+		return nt3;
+	});
 var author$project$GejmOfLajf$trimList = F2(
 	function (d, l) {
 		return A2(
 			elm$core$List$take,
 			elm$core$List$length(l) - (2 * d),
 			A2(elm$core$List$drop, d, l));
-	});
-var author$project$Matrix$getRow = F2(
-	function (y, m) {
-		return elm$core$Maybe$Just(
-			A2(
-				elm$core$Maybe$withDefault,
-				_List_Nil,
-				elm$core$List$head(m)));
 	});
 var elm$core$Basics$abs = function (n) {
 	return (n < 0) ? (-n) : n;
@@ -7207,10 +7386,10 @@ var elm$core$Maybe$map = F2(
 	});
 var author$project$GejmOfLajf$ensmallen = F2(
 	function (t, delta) {
-		var ts = author$project$Matrix$matrixWidth(t);
+		var ts = author$project$Matrix$width(t);
 		var d = elm$core$Basics$abs(delta);
 		var r = ts - (2 * d);
-		var rng = A2(elm$core$List$repeat, r, r);
+		var rng = A2(elm$core$List$range, 0, r);
 		var l = A2(
 			elm$core$List$map,
 			function (p) {
@@ -7223,8 +7402,7 @@ var author$project$GejmOfLajf$ensmallen = F2(
 						A2(author$project$Matrix$getRow, p + d, t)));
 			},
 			rng);
-		var m = l;
-		return m;
+		return l;
 	});
 var author$project$GejmOfLajf$resize = F2(
 	function (t, d) {
@@ -7238,7 +7416,7 @@ var author$project$GejmOfLajf$step = function (m) {
 		m,
 		{
 			genNumb: m.genNumb + 1,
-			matrica: author$project$GejmOfLajf$novoStanje(m.matrica)
+			matrica: author$project$GejmOfLajf$novoStanje(m)
 		});
 };
 var author$project$GejmOfLajf$toggleCell = function (c) {
@@ -7275,7 +7453,7 @@ var author$project$GejmOfLajf$update = F2(
 					_Utils_update(
 						model,
 						{
-							counter: elm$time$Time$millisToPosix(0),
+							counter: 0,
 							genNumb: 0,
 							matrica: A2(author$project$GejmOfLajf$ozivi, zivi, model.boardSize)
 						}),
@@ -7321,12 +7499,19 @@ var author$project$GejmOfLajf$update = F2(
 				return _Utils_Tuple2(
 					author$project$GejmOfLajf$step(model),
 					elm$core$Platform$Cmd$none);
-			default:
+			case 'Accelerate':
 				var d = msg.a;
 				return _Utils_Tuple2(
 					_Utils_update(
 						model,
 						{refreshTime: model.refreshTime + d}),
+					elm$core$Platform$Cmd$none);
+			default:
+				var t = msg.a;
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{topology: t}),
 					elm$core$Platform$Cmd$none);
 		}
 	});
@@ -7479,7 +7664,6 @@ var author$project$Main$NasaForma = function (a) {
 };
 var elm$browser$Browser$Navigation$load = _Browser_load;
 var elm$browser$Browser$Navigation$pushUrl = _Browser_pushUrl;
-var elm$core$Basics$round = _Basics_round;
 var elm$core$List$maybeCons = F3(
 	function (f, mx, xs) {
 		var _n0 = f(mx);
@@ -7516,6 +7700,10 @@ var elm$core$List$unzip = function (pairs) {
 		pairs);
 };
 var elm$core$Platform$Cmd$map = _Platform_map;
+var elm$core$Tuple$second = function (_n0) {
+	var y = _n0.b;
+	return y;
+};
 var elm$url$Url$addPort = F2(
 	function (maybePort, starter) {
 		if (maybePort.$ === 'Nothing') {
@@ -7569,9 +7757,7 @@ var author$project$Main$update = F2(
 				return _Utils_Tuple2(
 					_Utils_update(
 						model,
-						{
-							route: A2(elm$core$Debug$log, 'route', route)
-						}),
+						{route: route}),
 					elm$core$Platform$Cmd$none);
 			case 'RequestedUrl':
 				var urlReq = msg.a;
@@ -7668,11 +7854,7 @@ var author$project$Main$update = F2(
 						model,
 						{
 							clock: model.clock,
-							gol: A2(
-								author$project$GejmOfLajf$tick,
-								elm$time$Time$millisToPosix(
-									elm$core$Basics$round(diff)),
-								model.gol)
+							gol: A2(author$project$GejmOfLajf$tick, diff, model.gol)
 						}),
 					elm$core$Platform$Cmd$none);
 			case 'Gol':
@@ -8016,6 +8198,9 @@ var author$project$Forma$view = function (model) {
 var author$project$GejmOfLajf$Accelerate = function (a) {
 	return {$: 'Accelerate', a: a};
 };
+var author$project$GejmOfLajf$ChangeTopology = function (a) {
+	return {$: 'ChangeTopology', a: a};
+};
 var author$project$GejmOfLajf$KillAll = {$: 'KillAll'};
 var author$project$GejmOfLajf$Reseed = {$: 'Reseed'};
 var author$project$GejmOfLajf$Step = {$: 'Step'};
@@ -8095,8 +8280,25 @@ var author$project$GejmOfLajf$matrixToBoard = F4(
 	function (boardSize, x, y, c) {
 		var y_ = y * author$project$GejmOfLajf$cellSize(boardSize);
 		var x_ = x * author$project$GejmOfLajf$cellSize(boardSize);
-		var size = _List_fromArray(
+		var bgColor = function () {
+			if (c.$ === 'Ziva') {
+				return 'lawngreen';
+			} else {
+				return 'rgb(160, 160, 160)';
+			}
+		}();
+		var cellStyle = _List_fromArray(
 			[
+				A2(elm$html$Html$Attributes$style, 'border', '1px solid lightgray'),
+				A2(elm$html$Html$Attributes$style, 'position', 'absolute'),
+				A2(
+				elm$html$Html$Attributes$style,
+				'top',
+				elm$core$String$fromFloat(y_) + 'px'),
+				A2(
+				elm$html$Html$Attributes$style,
+				'left',
+				elm$core$String$fromFloat(x_) + 'px'),
 				A2(
 				elm$html$Html$Attributes$style,
 				'width',
@@ -8106,35 +8308,41 @@ var author$project$GejmOfLajf$matrixToBoard = F4(
 				elm$html$Html$Attributes$style,
 				'height',
 				elm$core$String$fromFloat(
-					author$project$GejmOfLajf$cellSize(boardSize)) + 'px')
-			]);
-		var pos = _List_fromArray(
-			[
-				A2(
-				elm$html$Html$Attributes$style,
-				'top',
-				elm$core$String$fromFloat(y_) + 'px'),
-				A2(
-				elm$html$Html$Attributes$style,
-				'left',
-				elm$core$String$fromFloat(x_) + 'px')
+					author$project$GejmOfLajf$cellSize(boardSize)) + 'px'),
+				A2(elm$html$Html$Attributes$style, 'background-color', bgColor)
 			]);
 		return A3(
 			author$project$GejmOfLajf$celToEle,
 			c,
 			_Utils_Tuple2(x, y),
-			A2(elm$core$List$append, pos, size));
+			cellStyle);
 	});
-var author$project$Matrix$toList = function (m) {
-	return A2(
-		elm$core$Maybe$withDefault,
-		_List_Nil,
-		elm$core$List$head(m));
+var author$project$GejmOfLajf$topologyToString = function (mt) {
+	switch (mt.$) {
+		case 'Plane':
+			return 'Plane';
+		case 'Torus':
+			return 'Torus';
+		case 'StripHorizontal':
+			return 'Horizontal Strip';
+		default:
+			return 'Vertical Strip';
+	}
 };
+var author$project$Matrix$Plane = {$: 'Plane'};
+var author$project$Matrix$StripHorizontal = {$: 'StripHorizontal'};
+var author$project$Matrix$StripVertical = {$: 'StripVertical'};
+var author$project$Matrix$toList = elm$core$List$concat;
 var elm$html$Html$table = _VirtualDom_node('table');
 var elm$html$Html$td = _VirtualDom_node('td');
 var elm$html$Html$tr = _VirtualDom_node('tr');
 var author$project$GejmOfLajf$view = function (model) {
+	var boardStyle = _List_fromArray(
+		[
+			A2(elm$html$Html$Attributes$style, 'position', 'relative'),
+			A2(elm$html$Html$Attributes$style, 'width', '700px'),
+			A2(elm$html$Html$Attributes$style, 'height', '700px')
+		]);
 	return A2(
 		elm$html$Html$div,
 		_List_Nil,
@@ -8142,10 +8350,7 @@ var author$project$GejmOfLajf$view = function (model) {
 			[
 				A2(
 				elm$html$Html$div,
-				_List_fromArray(
-					[
-						elm$html$Html$Attributes$class('board')
-					]),
+				boardStyle,
 				author$project$Matrix$toList(
 					A2(
 						author$project$Matrix$indexedMap,
@@ -8169,10 +8374,10 @@ var author$project$GejmOfLajf$view = function (model) {
 										elm$html$Html$text(
 										'gen: ' + (elm$core$String$fromInt(model.genNumb) + (':' + (A2(
 											author$project$GejmOfLajf$istocifra,
-											elm$core$String$fromInt(
-												elm$time$Time$posixToMillis(model.counter)),
+											elm$core$String$fromInt(model.counter),
 											model.refreshTime) + ('/' + elm$core$String$fromFloat(model.refreshTime))))))
 									])),
+								A2(elm$html$Html$td, _List_Nil, _List_Nil),
 								A2(
 								elm$html$Html$td,
 								_List_Nil,
@@ -8180,6 +8385,14 @@ var author$project$GejmOfLajf$view = function (model) {
 									[
 										elm$html$Html$text(
 										'size: ' + (elm$core$String$fromInt(model.boardSize) + ' ^2'))
+									])),
+								A2(
+								elm$html$Html$td,
+								_List_Nil,
+								_List_fromArray(
+									[
+										elm$html$Html$text(
+										author$project$GejmOfLajf$topologyToString(model.topology))
 									]))
 							])),
 						A2(
@@ -8236,6 +8449,40 @@ var author$project$GejmOfLajf$view = function (model) {
 											[
 												elm$html$Html$text('Zoom Out')
 											]))
+									])),
+								A2(
+								elm$html$Html$td,
+								_List_Nil,
+								_List_fromArray(
+									[
+										A2(
+										elm$html$Html$button,
+										_List_fromArray(
+											[
+												elm$html$Html$Events$onClick(
+												author$project$GejmOfLajf$ChangeTopology(author$project$Matrix$Torus))
+											]),
+										_List_fromArray(
+											[
+												elm$html$Html$text('Torus')
+											]))
+									])),
+								A2(
+								elm$html$Html$td,
+								_List_Nil,
+								_List_fromArray(
+									[
+										A2(
+										elm$html$Html$button,
+										_List_fromArray(
+											[
+												elm$html$Html$Events$onClick(
+												author$project$GejmOfLajf$ChangeTopology(author$project$Matrix$Plane))
+											]),
+										_List_fromArray(
+											[
+												elm$html$Html$text('Plane')
+											]))
 									]))
 							])),
 						A2(
@@ -8269,7 +8516,7 @@ var author$project$GejmOfLajf$view = function (model) {
 										_List_fromArray(
 											[
 												elm$html$Html$Events$onClick(
-												author$project$GejmOfLajf$Accelerate(-25))
+												author$project$GejmOfLajf$Accelerate(-150))
 											]),
 										_List_fromArray(
 											[
@@ -8280,7 +8527,7 @@ var author$project$GejmOfLajf$view = function (model) {
 										_List_fromArray(
 											[
 												elm$html$Html$Events$onClick(
-												author$project$GejmOfLajf$Accelerate(25))
+												author$project$GejmOfLajf$Accelerate(150))
 											]),
 										_List_fromArray(
 											[
@@ -8302,6 +8549,40 @@ var author$project$GejmOfLajf$view = function (model) {
 										_List_fromArray(
 											[
 												elm$html$Html$text('Zoom In')
+											]))
+									])),
+								A2(
+								elm$html$Html$td,
+								_List_Nil,
+								_List_fromArray(
+									[
+										A2(
+										elm$html$Html$button,
+										_List_fromArray(
+											[
+												elm$html$Html$Events$onClick(
+												author$project$GejmOfLajf$ChangeTopology(author$project$Matrix$StripVertical))
+											]),
+										_List_fromArray(
+											[
+												elm$html$Html$text('Vertical Strip')
+											]))
+									])),
+								A2(
+								elm$html$Html$td,
+								_List_Nil,
+								_List_fromArray(
+									[
+										A2(
+										elm$html$Html$button,
+										_List_fromArray(
+											[
+												elm$html$Html$Events$onClick(
+												author$project$GejmOfLajf$ChangeTopology(author$project$Matrix$StripHorizontal))
+											]),
+										_List_fromArray(
+											[
+												elm$html$Html$text('Horizontal Strip')
 											]))
 									]))
 							])),
@@ -8359,7 +8640,7 @@ var author$project$Klok$view = function (m) {
 					]),
 				_List_fromArray(
 					[
-						elm$html$Html$text('Dole')
+						elm$html$Html$text('-')
 					])),
 				elm$html$Html$text(
 				elm$core$String$fromInt(m.i)),
@@ -8372,7 +8653,7 @@ var author$project$Klok$view = function (m) {
 					]),
 				_List_fromArray(
 					[
-						elm$html$Html$text('Gore')
+						elm$html$Html$text('+')
 					])),
 				elm$html$Html$text(' - ' + m.id)
 			]));
@@ -8482,7 +8763,7 @@ var author$project$Main$dugmad = elm$core$List$indexedMap(
 		}));
 var elm$html$Html$h1 = _VirtualDom_node('h1');
 var author$project$Main$pageByRoute = function (model) {
-	var _n0 = A2(elm$core$Debug$log, 'model.route', model.route);
+	var _n0 = model.route;
 	switch (_n0.$) {
 		case 'Prva':
 			var naziv = function () {
@@ -8581,12 +8862,10 @@ var author$project$Main$main = elm$browser$Browser$application(
 	{
 		init: author$project$Main$init,
 		onUrlChange: function (url) {
-			return author$project$Main$UrlUpdate(
-				A2(elm$core$Debug$log, 'new url', url));
+			return author$project$Main$UrlUpdate(url);
 		},
 		onUrlRequest: function (urlReq) {
-			return author$project$Main$RequestedUrl(
-				A2(elm$core$Debug$log, 'req url', urlReq));
+			return author$project$Main$RequestedUrl(urlReq);
 		},
 		subscriptions: author$project$Main$subscriptions,
 		update: author$project$Main$update,

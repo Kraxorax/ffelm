@@ -27,8 +27,8 @@ main =
         , view = view
         , update = update
         , subscriptions = subscriptions
-        , onUrlChange = (\url -> UrlUpdate (log "new url" url))
-        , onUrlRequest = (\urlReq -> RequestedUrl (log "req url" urlReq))
+        , onUrlChange = (\url -> UrlUpdate url)
+        , onUrlRequest = (\urlReq -> RequestedUrl urlReq)
         }
 
 
@@ -38,7 +38,8 @@ init flags location key =
         route =
             Routing.routeLocation location
     in
-        ( { navKey = key
+        ( { 
+            navKey = key
             ,dugmici =
                 [ Dugme.init Color.darkGray Color.orange "Kara"
                 , Dugme.init Color.green Color.red "Klasik"
@@ -81,11 +82,11 @@ update msg model =
                 route =
                     Routing.routeLocation location
             in
-                ({ model | route = (log "route" route) } , Cmd.none)
+                ({ model | route = route } , Cmd.none)
         RequestedUrl urlReq ->
             case urlReq of
-                Browser.Internal url -> ( model, pushUrl model.navKey (Url.toString url))
-                Browser.External href -> (model, load href)
+                Browser.Internal url -> ( model, pushUrl model.navKey (Url.toString url) )
+                Browser.External href -> ( model, load href )
         
         AMsg ->
             (model , Cmd.none)
@@ -146,7 +147,7 @@ update msg model =
         Animate diff ->
             ({ model
                 | clock = model.clock
-                , gol = GejmOfLajf.tick (millisToPosix(round diff)) model.gol
+                , gol = GejmOfLajf.tick diff model.gol
             }
                 , Cmd.none)
         Gol golMsg ->
@@ -168,7 +169,7 @@ subscriptions model =
 
 pageByRoute : Model -> Html Msg
 pageByRoute model =
-    case (log "model.route" model.route) of
+    case model.route of
         Prva ->
             let
                 naziv = case model.naziv of
@@ -193,7 +194,6 @@ pageByRoute model =
             , Klokotalo.view model.klokotalo |> Html.map Klokotalo
             ]
       
-
         GOL ->
              Html.map (\golMsg -> Gol golMsg) (GejmOfLajf.view model.gol)
 

@@ -13,11 +13,11 @@ type alias Model =
     { navKey : Key 
     , dugmici : List Dugme
     , naziv : Maybe String
-    , formica : Forma.Model
-    , klok : Klok.Klok
-    , klokotalo : Klokotalo.Model
     , route : Route
     , clock : Float
     , counter : Float
+    , formica : Forma.Model
+    , klok : Klok.Klok
+    , klokotalo : Klokotalo.Model
     , gol : GejmOfLajf.Model
     }

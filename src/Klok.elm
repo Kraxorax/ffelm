@@ -32,8 +32,8 @@ update msg m =
 view: Klok -> Html Msg
 view m =
   div []
-    [ button [ onClick ( Dole m.id ) ] [ text "Dole" ]
+    [ button [ onClick ( Dole m.id ) ] [ text "-" ]
     , text (String.fromInt m.i)
-    , button [ onClick ( Gore m.id ) ] [ text "Gore" ]
+    , button [ onClick ( Gore m.id ) ] [ text "+" ]
     , text (" - " ++ m.id)
     ]

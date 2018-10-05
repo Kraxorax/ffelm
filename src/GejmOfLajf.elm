@@ -7,16 +7,17 @@ import Html exposing (..)
 import Html.Attributes exposing (class, style)
 import Html.Events exposing (onClick)
 import Tuple
+import Debug
 
 
 defaultBoardSize : Int
-defaultBoardSize = 30
+defaultBoardSize = 10
 
 boardPxWH : Float
 boardPxWH = 700
 
 defaultRefreshTime : Float
-defaultRefreshTime = 150
+defaultRefreshTime = 30
 
 type Celija
     = Ziva
@@ -24,7 +25,7 @@ type Celija
 
 
 type Msg
-    = Tick Posix
+    = Tick Float
     | ToggleRunning
     | Reseed
     | Recreate (List(Int, Int))
@@ -33,6 +34,7 @@ type Msg
     | Klik (Int, Int) Celija
     | Step 
     | Accelerate Float
+    | ChangeTopology Matrix.MatrixTopology
 
 
 
@@ -42,25 +44,33 @@ type alias Tabla =
 
 type alias Model =
     { matrica : Tabla
-    , boardSize: Int
-    , clock : Posix
-    , counter : Posix
+    , boardSize : Int
+    , clock : Int
+    , counter : Int
     , genNumb : Int
     , running : Bool
-    , refreshTime: Float
+    , refreshTime : Float
+    , topology : Matrix.MatrixTopology
     }
 
+flyer : List (Int, Int)
+flyer = [   (5, 5), (6, 5), (7, 5)
+        ,                   (7, 6)
+        ,           (6, 7)
+        ]
 
 init : List ( Int, Int ) -> Model
 init zivi =
     Model 
-        (ozivi zivi defaultBoardSize) 
+        -- (ozivi zivi defaultBoardSize) 
+        (ozivi flyer defaultBoardSize) 
         defaultBoardSize 
-        (Time.millisToPosix 0) 
-        (Time.millisToPosix 0) 
         0 
-        True 
+        0 
+        0 
+        True
         defaultRefreshTime
+        Matrix.Torus
 
 
 ozivi : List (Int, Int) -> Int -> Matrix Celija
@@ -87,14 +97,14 @@ resize t d =
 enlarge : Tabla -> Int -> Tabla
 enlarge t d =
     let
-        hsides = (repeat d (matrixHeight t)  Mrtva)
+        hsides = (repeat d (Matrix.height t)  Mrtva)
 
         nt = Maybe.withDefault t
             (concatHorizontal hsides t)
         nt1 = Maybe.withDefault t
             (concatHorizontal nt hsides)
 
-        vsides = (repeat (matrixWidth nt1) d Mrtva)
+        vsides = (repeat (Matrix.width nt1) d Mrtva)
 
         nt2 = Maybe.withDefault t
             (concatVertical vsides nt1)
@@ -108,19 +118,17 @@ ensmallen : Tabla -> Int -> Tabla
 ensmallen t delta =
     let
         d = abs delta
-        ts = matrixWidth t
+        ts = Matrix.width t
         r = ts - 2 * d
 
-        rng = List.repeat r r
+        rng = List.range 0 r
 
         l = List.map (\p -> Matrix.getRow (p+d) t 
                             |> Maybe.map (trimList d)
                             |> Maybe.withDefault []
                     ) rng
-
-        m = l -- Matrix.fromList l |> Maybe.withDefault t
     in
-        m
+        l
 
 
 trimList : Int -> List a -> List a
@@ -128,16 +136,16 @@ trimList d l =
     List.drop d l |> List.take ((List.length l) - 2*d)
 
 
-numbOfZive : Int -> Int -> Tabla -> Int
-numbOfZive x y t =
-    (okoloTorus x y t) |> List.filter isZiva |> List.length
+numbOfZive : Int -> Int -> Model -> Int
+numbOfZive x y m =
+    (Matrix.neighbours m.topology x y m.matrica) |> List.filter isZiva |> List.length
 
 
-okoloTorus : Int -> Int -> Tabla -> List Celija
-okoloTorus x y t =
+customNeigburs : Int -> Int -> Tabla -> List Celija
+customNeigburs x y t =
     let
-        mx = matrixHeight t
-        my = matrixWidth t
+        mx = Matrix.height t
+        my = Matrix.width t
 
         locs =  [   (-1, -1), (0, -1), (1, -1)
                 ,   (-1,  0),          (1,  0)
@@ -152,7 +160,7 @@ okoloTorus x y t =
                 xn = modulo (dx + x) mx
                 yn = modulo (dy + y) my
 
-                n = Maybe.withDefault Mrtva (matrixGet xn yn t)
+                n = Maybe.withDefault Mrtva (Matrix.get xn yn t)
             in
                 n
             ) locs
@@ -167,14 +175,14 @@ modulo a m =
         then m - a
     else a
 
-novoStanje : Tabla -> Tabla
-novoStanje t =
-    t
+novoStanje : Model -> Tabla
+novoStanje m =
+    m.matrica
         |> indexedMap
             (\x y c ->
                 let
                     komsije =
-                        numbOfZive x y t
+                        numbOfZive x y m
                 in
                     survival komsije c
             )
@@ -210,27 +218,26 @@ toggleCell c =
             Ziva
 
 
-tick : Posix -> Model -> Model
+tick : Float -> Model -> Model
 tick dt model =
     let
-        t = (Time.posixToMillis model.counter) + (Time.posixToMillis dt)
-        t1 = if (toFloat t) > model.refreshTime then 0 else t
-        m = if t1 == 0 then novoStanje model.matrica else model.matrica
+        t = toFloat model.counter + dt
+        t1 = if t > model.refreshTime then 0 else t
+        m = if t1 == 0 then novoStanje model else model.matrica
         gn = if t1 == 0 then model.genNumb + 1 else model.genNumb
     in
         if not model.running then model
         else
         { model
-            | counter = Time.millisToPosix t1
-            -- lol @ Posix
-            , clock = Time.millisToPosix ((Time.posixToMillis model.clock) + (Time.posixToMillis dt))
+            | counter = round t1
+            , clock = model.clock + round dt
             , genNumb = gn
             , matrica = m }
 
 step : Model -> Model
 step m =
     { m 
-    | matrica = novoStanje m.matrica
+    | matrica = novoStanje m
     , genNumb = m.genNumb + 1
     }
 
@@ -247,7 +254,7 @@ update msg model =
             ({   model
             |   matrica = ozivi zivi model.boardSize
             ,   genNumb = 0
-            ,   counter = Time.millisToPosix 0
+            ,   counter = 0
             } , Cmd.none)
         Zoom d ->
             let
@@ -279,6 +286,10 @@ update msg model =
             ({ model
             | refreshTime = model.refreshTime + d 
             } , Cmd.none)
+        ChangeTopology t ->
+            ({ model
+            |   topology = t
+            }, Cmd.none)
 
 
 celToString : Celija -> String
@@ -315,15 +326,21 @@ matrixToBoard boardSize x y c  =
         y_ =
             toFloat y * (cellSize boardSize)
 
-        pos =
-            [ style  "top" ((String.fromFloat y_) ++ "px") , style "left" ((String.fromFloat x_) ++ "px" ) ]
+        bgColor = case c of
+                    Ziva -> "lawngreen"
+                    Mrtva -> "rgb(160, 160, 160)"
 
-        size =
-            [ style "width" ((String.fromFloat (cellSize boardSize)) ++ "px" )
+        cellStyle = 
+            [ style "border" "1px solid lightgray"
+            , style "position" "absolute" 
+            , style  "top" ((String.fromFloat y_) ++ "px")
+            , style "left" ((String.fromFloat x_) ++ "px" ) 
+            , style "width" ((String.fromFloat (cellSize boardSize)) ++ "px" )
             , style "height" ((String.fromFloat (cellSize boardSize)) ++ "px" )
+            , style "background-color" bgColor
             ]
     in
-        celToEle c (x, y) (List.append pos size)
+        celToEle c (x, y) cellStyle
 
 
 istocifra: String -> Float -> String
@@ -339,46 +356,58 @@ randomBrojevi boardSize =
     list ((toFloat boardSize ^ 2 / 4) |> floor)
         <| pair (int 0 boardSize) (int 0 boardSize)
 
+topologyToString : Matrix.MatrixTopology -> String
+topologyToString mt =
+    case mt of
+        Matrix.Plane -> "Plane"
+        Matrix.Torus -> "Torus"
+        Matrix.StripHorizontal -> "Horizontal Strip"
+        Matrix.StripVertical -> "Vertical Strip"
+
 
 view : Model -> Html Msg
 view model =
-    -- let
-    --     board = (indexedMap
-    --             (matrixToBoard model.boardSize)
-    --             model.matrica
-    --         )
-    --         |> toIndexedArray
-    
-    -- in
+    let
+        boardStyle = [
+                style "position" "relative",
+                style "width" "700px",
+                style "height" "700px"
+            ]
+    in
         
     div []
-    [   div [ class "board" ]
+    [   div boardStyle
             ((indexedMap
                 (matrixToBoard model.boardSize)
                 model.matrica
             )   |> Matrix.toList
-                -- |> toIndexedArray
-                -- |> Array.map (\((_),c) -> c)
-                -- |> Array.toList
             )
     ,   table []
         [   tr [] [
                 td [] [ text ("gen: " ++ (String.fromInt model.genNumb)
-                                ++ ":" ++ (istocifra (String.fromInt (Time.posixToMillis model.counter)) model.refreshTime)
+                                ++ ":" ++ (istocifra (String.fromInt model.counter) model.refreshTime)
                                 ++ "/" ++ (String.fromFloat model.refreshTime))
                 ]
+            ,   td [] []
             ,   td [] [ text ("size: " ++ (String.fromInt model.boardSize) ++ " ^2")
                 ]
+            ,   td [] [ text (topologyToString model.topology) ]
             ]
         ,   tr [] [
                 td [] [
                     button [ onClick ToggleRunning ] [text (if not model.running then "START" else "STOP")]
                 ]
             ,   td [] [
-                button [ onClick Step ] [text "Step"]
-            ]
+                    button [ onClick Step ] [text "Step"]
+                ]
             ,   td [] [
                     button [ onClick (Zoom 1) ] [text "Zoom Out"]
+                ]
+            ,   td [] [
+                    button [ onClick (ChangeTopology Matrix.Torus) ] [text "Torus"]
+                ]
+            ,   td [] [
+                    button [ onClick (ChangeTopology Matrix.Plane) ] [text "Plane"]
                 ]
             ]
         ,   tr [] [
@@ -386,11 +415,17 @@ view model =
                     button [ onClick KillAll ] [text "KILL ALL"]
                 ]
             ,   td [] [
-                    button [ onClick (Accelerate -25) ] [text "Spd +"]
-                ,   button [ onClick (Accelerate 25) ] [text "Spd -"]
-            ]
+                    button [ onClick (Accelerate -150) ] [text "Spd +"]
+                ,   button [ onClick (Accelerate 150) ] [text "Spd -"]
+                ]
             ,   td [] [
                     button [ onClick (Zoom -1) ] [text "Zoom In"]
+                ]
+            ,   td [] [
+                    button [ onClick (ChangeTopology Matrix.StripVertical ) ] [text "Vertical Strip"]
+                ]
+            ,   td [] [
+                    button [ onClick (ChangeTopology Matrix.StripHorizontal) ] [text "Horizontal Strip"]
                 ]
             ]
         ,   tr [] [
