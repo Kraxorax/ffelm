@@ -1,11 +1,12 @@
-module GejmOfLajf exposing (Celija(..), Model, Msg(..), Tabla, boardPxWH, celToEle, celToString, cellSize, customNeigburs, defaultBoardSize, defaultRefreshTime, enlarge, ensmallen, flyer, init, isZiva, istocifra, matrixToBoard, modulo, novoStanje, numbOfZive, ozivi, randomBrojevi, resize, step, survival, tick, toggleCell, topologyToString, trimList, update, view)
+module GejmOfLajf exposing (Celija(..), Model, Msg(..), Tabla, boardPxWH, celToEle, celToString, cellSize, defaultBoardSize, defaultRefreshTime, enlarge, flyer, init, isZiva, istocifra, matrixToBoard, modulo, novoStanje, numbOfZive, ozivi, randomBrojevi,  step, survival, tick, toggleCell, topologyToString, trimList, update, view)
 
 import Debug
+import Array
 import Html exposing (..)
 import Html.Attributes exposing (class, style)
 import Html.Events exposing (onClick)
-import Matrix as Matrix exposing (..)
-import Matrix.Neighbours exposing (..)
+import Matrix exposing (..)
+import Neighbours exposing (..)
 import Random exposing (Generator, generate, int, list, pair)
 import Time exposing (Posix)
 import Tuple
@@ -13,7 +14,7 @@ import Tuple
 
 defaultBoardSize : Int
 defaultBoardSize =
-    10
+    60
 
 
 boardPxWH : Float
@@ -56,7 +57,7 @@ type alias Model =
     , genNumb : Int
     , running : Bool
     , refreshTime : Float
-    , topology : MatrixTopology
+    , topology : Neighbours.MatrixTopology
     }
 
 
@@ -116,22 +117,22 @@ enlarge t d =
             repeat d (Matrix.height t) Mrtva
 
         nt =
-            Maybe.withDefault t
+            Result.withDefault t
                 (concatHorizontal hsides t)
 
         nt1 =
-            Maybe.withDefault t
+            Result.withDefault t
                 (concatHorizontal nt hsides)
 
         vsides =
             repeat (Matrix.width nt1) d Mrtva
 
         nt2 =
-            Maybe.withDefault t
+            Result.withDefault t
                 (concatVertical vsides nt1)
 
         nt3 =
-            Maybe.withDefault nt2
+            Result.withDefault nt2
                 (concatVertical nt2 vsides)
     in
     nt3
@@ -152,17 +153,15 @@ ensmallen t delta =
         rng =
             List.range 0 r
 
-        l =
-            List.map
-                (\p ->
-                    Matrix.getRow (p + d) t
-                        |> Maybe.map (trimList d)
-                        |> Maybe.withDefault []
-                )
-                rng
-    in
-    l
+        sm =
+            Matrix.generate r r (\x y -> (Matrix.get (x + d) (y + d) t) |> Result.withDefault Mrtva)
 
+    in
+    sm
+
+trimArray : Int -> Array.Array a -> Array.Array a
+trimArray d a =
+    Array.toList a |> trimList d |> Array.fromList
 
 trimList : Int -> List a -> List a
 trimList d l =
@@ -171,53 +170,7 @@ trimList d l =
 
 numbOfZive : Int -> Int -> Model -> Int
 numbOfZive x y m =
-    neighbours m.topology x y m.matrica |> List.filter isZiva |> List.length
-
-
-customNeigburs : Int -> Int -> Tabla -> List Celija
-customNeigburs x y t =
-    let
-        mx =
-            Matrix.height t
-
-        my =
-            Matrix.width t
-
-        locs =
-            [ ( -1, -1 )
-            , ( 0, -1 )
-            , ( 1, -1 )
-            , ( -1, 0 )
-            , ( 1, 0 )
-            , ( -1, 1 )
-            , ( 0, 1 )
-            , ( 1, 1 )
-            ]
-
-        l =
-            List.map
-                (\pos ->
-                    let
-                        dx =
-                            Tuple.first pos
-
-                        dy =
-                            Tuple.second pos
-
-                        xn =
-                            modulo (dx + x) mx
-
-                        yn =
-                            modulo (dy + y) my
-
-                        n =
-                            Maybe.withDefault Mrtva (Matrix.get xn yn t)
-                    in
-                    n
-                )
-                locs
-    in
-    l
+    neighbours m.topology x y m.matrica |> Array.toList |> List.filter isZiva |> List.length
 
 
 modulo : Int -> Int -> Int
@@ -507,7 +460,7 @@ view model =
             (indexedMap
                 (matrixToBoard model.boardSize)
                 model.matrica
-                |> Matrix.toList
+                |> Matrix.toArray |> Array.toList
             )
         , table []
             [ tr []
