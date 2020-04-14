@@ -1,8 +1,8 @@
-module Klokotalo exposing (..)
+module Klokotalo exposing (Model, Msg(..), Operacija(..), crtajKlokove, init, update, view)
 
-import Html exposing (..)
-import Html.Events exposing (on, onInput, onClick)
-import Debug exposing (..)
+import Debug exposing (log)
+import Html as Html
+import Html.Events exposing (onClick)
 import Klok
 
 
@@ -75,18 +75,15 @@ update msg model =
 
                         rest =
                             List.tail vals |> Maybe.withDefault []
-
-                        --   log "first" first
-                        --   log "rest" rest
                     in
-                        { model
-                            | rezultat = Just (toFloat (List.foldl (\r f -> (log "f" f) - (log "r" r)) (log "first" first) (log "rest" rest)))
-                        }
+                    { model
+                        | rezultat = Just (toFloat (List.foldl (\r f -> log "f" f - log "r" r) (log "first" first) (log "rest" rest)))
+                    }
 
                 Deljenje ->
                     case model.klokovi of
                         [] ->
-                            { model | rezultat = Just (1.0) }
+                            { model | rezultat = Just 1.0 }
 
                         h :: t ->
                             { model
@@ -108,21 +105,22 @@ update msg model =
                             (\k ->
                                 if k.id == id then
                                     Klok.update klik k
+
                                 else
                                     k
                             )
             in
-                { model | klokovi = ks }
+            { model | klokovi = ks }
 
 
-view : Model -> Html Msg
+view : Model -> Html.Html Msg
 view model =
     let
         ks =
             model.klokovi
 
         rezultat =
-            (model.rezultat |> Maybe.withDefault 0) |> toString
+            model.rezultat |> Maybe.withDefault 0
 
         operacija =
             model.operacija
@@ -141,18 +139,18 @@ view model =
                 Deljenje ->
                     Sabiranje
     in
-        div []
-            [ button [ onClick DodajKlok ] [ text "dodaj klok" ]
-            , div [] (crtajKlokove ks)
-            , button
-                [ onClick (PostaviOperaciju novaop) ]
-                [ text ("promeni u " ++ (novaop |> toString)) ]
-            , div [] [ text (operacija |> toString) ]
-            , button [ onClick Racunaj ] [ text "racunaj" ]
-            , div [] [ text rezultat ]
-            ]
+    Html.div []
+        [ Html.button [ onClick DodajKlok ] [ Html.text "dodaj klok" ]
+        , Html.div [] (crtajKlokove ks)
+        , Html.button
+            [ onClick (PostaviOperaciju novaop) ]
+            [ Html.text ("promeni u " ++ (novaop |> Debug.toString)) ]
+        , Html.div [] [ Html.text (operacija |> Debug.toString) ]
+        , Html.button [ onClick Racunaj ] [ Html.text "racunaj" ]
+        , Html.div [] [ Html.text (rezultat |> String.fromFloat) ]
+        ]
 
 
-crtajKlokove : List Klok.Klok -> List (Html Msg)
+crtajKlokove : List Klok.Klok -> List (Html.Html Msg)
 crtajKlokove =
     List.map (\k -> Html.map (Klik k.id) (Klok.view k))

@@ -4506,7 +4506,8 @@ var elm$core$Maybe$Nothing = {$: 'Nothing'};
 var author$project$Forma$init = function (a) {
 	return {drugu: '', parsd: elm$core$Maybe$Nothing, prvu: '', sdugme: author$project$Forma$submitDugme, title: ''};
 };
-var author$project$GejmOfLajf$defaultBoardSize = 10;
+var author$project$GejmOfLajf$defaultBoardSize = 60;
+var Kraxorax$elm_matrix_a$Neighbours$Torus = {$: 'Torus'};
 var author$project$GejmOfLajf$Model = F8(
 	function (matrica, boardSize, clock, counter, genNumb, running, refreshTime, topology) {
 		return {boardSize: boardSize, clock: clock, counter: counter, genNumb: genNumb, matrica: matrica, refreshTime: refreshTime, running: running, topology: topology};
@@ -4520,10 +4521,30 @@ var author$project$GejmOfLajf$flyer = _List_fromArray(
 		_Utils_Tuple2(7, 6),
 		_Utils_Tuple2(6, 7)
 	]);
-var author$project$GejmOfLajf$Mrtva = {$: 'Mrtva'};
-var author$project$GejmOfLajf$Ziva = {$: 'Ziva'};
-var elm$core$Basics$sub = _Basics_sub;
-var elm$core$Basics$add = _Basics_add;
+var Kraxorax$elm_matrix_a$Matrix$Matrix = F2(
+	function (a, b) {
+		return {$: 'Matrix', a: a, b: b};
+	});
+var elm$core$Array$Leaf = function (a) {
+	return {$: 'Leaf', a: a};
+};
+var elm$core$Array$branchFactor = 32;
+var elm$core$Array$Array_elm_builtin = F4(
+	function (a, b, c, d) {
+		return {$: 'Array_elm_builtin', a: a, b: b, c: c, d: d};
+	});
+var elm$core$Basics$ceiling = _Basics_ceiling;
+var elm$core$Basics$logBase = F2(
+	function (base, number) {
+		return _Basics_log(number) / _Basics_log(base);
+	});
+var elm$core$Basics$toFloat = _Basics_toFloat;
+var elm$core$Array$shiftStep = elm$core$Basics$ceiling(
+	A2(elm$core$Basics$logBase, 2, elm$core$Array$branchFactor));
+var elm$core$Array$SubTree = function (a) {
+	return {$: 'SubTree', a: a};
+};
+var elm$core$Elm$JsArray$initializeFromList = _JsArray_initializeFromList;
 var elm$core$List$foldl = F3(
 	function (func, acc, list) {
 		foldl:
@@ -4543,103 +4564,224 @@ var elm$core$List$foldl = F3(
 			}
 		}
 	});
-var elm$core$List$length = function (xs) {
-	return A3(
-		elm$core$List$foldl,
-		F2(
-			function (_n0, i) {
-				return i + 1;
-			}),
-		0,
-		xs);
+var elm$core$List$reverse = function (list) {
+	return A3(elm$core$List$foldl, elm$core$List$cons, _List_Nil, list);
 };
-var elm$core$List$map2 = _List_map2;
-var elm$core$Basics$le = _Utils_le;
-var elm$core$List$rangeHelp = F3(
-	function (lo, hi, list) {
-		rangeHelp:
+var elm$core$Array$compressNodes = F2(
+	function (nodes, acc) {
+		compressNodes:
 		while (true) {
-			if (_Utils_cmp(lo, hi) < 1) {
-				var $temp$lo = lo,
-					$temp$hi = hi - 1,
-					$temp$list = A2(elm$core$List$cons, hi, list);
-				lo = $temp$lo;
-				hi = $temp$hi;
-				list = $temp$list;
-				continue rangeHelp;
+			var _n0 = A2(elm$core$Elm$JsArray$initializeFromList, elm$core$Array$branchFactor, nodes);
+			var node = _n0.a;
+			var remainingNodes = _n0.b;
+			var newAcc = A2(
+				elm$core$List$cons,
+				elm$core$Array$SubTree(node),
+				acc);
+			if (!remainingNodes.b) {
+				return elm$core$List$reverse(newAcc);
 			} else {
-				return list;
+				var $temp$nodes = remainingNodes,
+					$temp$acc = newAcc;
+				nodes = $temp$nodes;
+				acc = $temp$acc;
+				continue compressNodes;
 			}
 		}
-	});
-var elm$core$List$range = F2(
-	function (lo, hi) {
-		return A3(elm$core$List$rangeHelp, lo, hi, _List_Nil);
-	});
-var elm$core$List$indexedMap = F2(
-	function (f, xs) {
-		return A3(
-			elm$core$List$map2,
-			f,
-			A2(
-				elm$core$List$range,
-				0,
-				elm$core$List$length(xs) - 1),
-			xs);
-	});
-var author$project$Matrix$indexedMap = function (f) {
-	return elm$core$List$indexedMap(
-		F2(
-			function (y, row) {
-				return A2(
-					elm$core$List$indexedMap,
-					F2(
-						function (x, ele) {
-							return A3(f, x, y, ele);
-						}),
-					row);
-			}));
-};
-var elm$core$Basics$composeR = F3(
-	function (f, g, x) {
-		return g(
-			f(x));
-	});
-var elm$core$List$repeatHelp = F3(
-	function (result, n, value) {
-		repeatHelp:
-		while (true) {
-			if (n <= 0) {
-				return result;
-			} else {
-				var $temp$result = A2(elm$core$List$cons, value, result),
-					$temp$n = n - 1,
-					$temp$value = value;
-				result = $temp$result;
-				n = $temp$n;
-				value = $temp$value;
-				continue repeatHelp;
-			}
-		}
-	});
-var elm$core$List$repeat = F2(
-	function (n, value) {
-		return A3(elm$core$List$repeatHelp, _List_Nil, n, value);
-	});
-var author$project$Matrix$repeat = F2(
-	function (w, h) {
-		return A2(
-			elm$core$Basics$composeR,
-			elm$core$List$repeat(w),
-			elm$core$List$repeat(h));
 	});
 var elm$core$Basics$apR = F2(
 	function (x, f) {
 		return f(x);
 	});
 var elm$core$Basics$eq = _Utils_equal;
-var elm$core$Basics$False = {$: 'False'};
+var elm$core$Tuple$first = function (_n0) {
+	var x = _n0.a;
+	return x;
+};
+var elm$core$Array$treeFromBuilder = F2(
+	function (nodeList, nodeListSize) {
+		treeFromBuilder:
+		while (true) {
+			var newNodeSize = elm$core$Basics$ceiling(nodeListSize / elm$core$Array$branchFactor);
+			if (newNodeSize === 1) {
+				return A2(elm$core$Elm$JsArray$initializeFromList, elm$core$Array$branchFactor, nodeList).a;
+			} else {
+				var $temp$nodeList = A2(elm$core$Array$compressNodes, nodeList, _List_Nil),
+					$temp$nodeListSize = newNodeSize;
+				nodeList = $temp$nodeList;
+				nodeListSize = $temp$nodeListSize;
+				continue treeFromBuilder;
+			}
+		}
+	});
+var elm$core$Basics$add = _Basics_add;
+var elm$core$Basics$apL = F2(
+	function (f, x) {
+		return f(x);
+	});
+var elm$core$Basics$floor = _Basics_floor;
+var elm$core$Basics$gt = _Utils_gt;
+var elm$core$Basics$max = F2(
+	function (x, y) {
+		return (_Utils_cmp(x, y) > 0) ? x : y;
+	});
+var elm$core$Basics$mul = _Basics_mul;
+var elm$core$Basics$sub = _Basics_sub;
+var elm$core$Elm$JsArray$empty = _JsArray_empty;
+var elm$core$Elm$JsArray$length = _JsArray_length;
+var elm$core$Array$builderToArray = F2(
+	function (reverseNodeList, builder) {
+		if (!builder.nodeListSize) {
+			return A4(
+				elm$core$Array$Array_elm_builtin,
+				elm$core$Elm$JsArray$length(builder.tail),
+				elm$core$Array$shiftStep,
+				elm$core$Elm$JsArray$empty,
+				builder.tail);
+		} else {
+			var treeLen = builder.nodeListSize * elm$core$Array$branchFactor;
+			var depth = elm$core$Basics$floor(
+				A2(elm$core$Basics$logBase, elm$core$Array$branchFactor, treeLen - 1));
+			var correctNodeList = reverseNodeList ? elm$core$List$reverse(builder.nodeList) : builder.nodeList;
+			var tree = A2(elm$core$Array$treeFromBuilder, correctNodeList, builder.nodeListSize);
+			return A4(
+				elm$core$Array$Array_elm_builtin,
+				elm$core$Elm$JsArray$length(builder.tail) + treeLen,
+				A2(elm$core$Basics$max, 5, depth * elm$core$Array$shiftStep),
+				tree,
+				builder.tail);
+		}
+	});
+var elm$core$Bitwise$shiftLeftBy = _Bitwise_shiftLeftBy;
+var elm$core$Bitwise$shiftRightZfBy = _Bitwise_shiftRightZfBy;
+var elm$core$Array$tailIndex = function (len) {
+	return (len >>> 5) << 5;
+};
 var elm$core$Basics$True = {$: 'True'};
+var elm$core$Elm$JsArray$foldl = _JsArray_foldl;
+var elm$core$Elm$JsArray$indexedMap = _JsArray_indexedMap;
+var elm$core$Array$indexedMap = F2(
+	function (func, _n0) {
+		var len = _n0.a;
+		var tree = _n0.c;
+		var tail = _n0.d;
+		var initialBuilder = {
+			nodeList: _List_Nil,
+			nodeListSize: 0,
+			tail: A3(
+				elm$core$Elm$JsArray$indexedMap,
+				func,
+				elm$core$Array$tailIndex(len),
+				tail)
+		};
+		var helper = F2(
+			function (node, builder) {
+				if (node.$ === 'SubTree') {
+					var subTree = node.a;
+					return A3(elm$core$Elm$JsArray$foldl, helper, builder, subTree);
+				} else {
+					var leaf = node.a;
+					var offset = builder.nodeListSize * elm$core$Array$branchFactor;
+					var mappedLeaf = elm$core$Array$Leaf(
+						A3(elm$core$Elm$JsArray$indexedMap, func, offset, leaf));
+					return {
+						nodeList: A2(elm$core$List$cons, mappedLeaf, builder.nodeList),
+						nodeListSize: builder.nodeListSize + 1,
+						tail: builder.tail
+					};
+				}
+			});
+		return A2(
+			elm$core$Array$builderToArray,
+			true,
+			A3(elm$core$Elm$JsArray$foldl, helper, initialBuilder, tree));
+	});
+var Kraxorax$elm_matrix_a$Matrix$indexedMap = F2(
+	function (f, _n0) {
+		var w = _n0.a;
+		var m = _n0.b;
+		return A2(
+			Kraxorax$elm_matrix_a$Matrix$Matrix,
+			w,
+			A2(
+				elm$core$Array$indexedMap,
+				F2(
+					function (y, row) {
+						return A2(
+							elm$core$Array$indexedMap,
+							F2(
+								function (x, ele) {
+									return A3(f, x, y, ele);
+								}),
+							row);
+					}),
+				m));
+	});
+var elm$core$Array$empty = A4(elm$core$Array$Array_elm_builtin, 0, elm$core$Array$shiftStep, elm$core$Elm$JsArray$empty, elm$core$Elm$JsArray$empty);
+var elm$core$Basics$False = {$: 'False'};
+var elm$core$Basics$idiv = _Basics_idiv;
+var elm$core$Basics$lt = _Utils_lt;
+var elm$core$Elm$JsArray$initialize = _JsArray_initialize;
+var elm$core$Array$initializeHelp = F5(
+	function (fn, fromIndex, len, nodeList, tail) {
+		initializeHelp:
+		while (true) {
+			if (fromIndex < 0) {
+				return A2(
+					elm$core$Array$builderToArray,
+					false,
+					{nodeList: nodeList, nodeListSize: (len / elm$core$Array$branchFactor) | 0, tail: tail});
+			} else {
+				var leaf = elm$core$Array$Leaf(
+					A3(elm$core$Elm$JsArray$initialize, elm$core$Array$branchFactor, fromIndex, fn));
+				var $temp$fn = fn,
+					$temp$fromIndex = fromIndex - elm$core$Array$branchFactor,
+					$temp$len = len,
+					$temp$nodeList = A2(elm$core$List$cons, leaf, nodeList),
+					$temp$tail = tail;
+				fn = $temp$fn;
+				fromIndex = $temp$fromIndex;
+				len = $temp$len;
+				nodeList = $temp$nodeList;
+				tail = $temp$tail;
+				continue initializeHelp;
+			}
+		}
+	});
+var elm$core$Basics$le = _Utils_le;
+var elm$core$Basics$remainderBy = _Basics_remainderBy;
+var elm$core$Array$initialize = F2(
+	function (len, fn) {
+		if (len <= 0) {
+			return elm$core$Array$empty;
+		} else {
+			var tailLen = len % elm$core$Array$branchFactor;
+			var tail = A3(elm$core$Elm$JsArray$initialize, tailLen, len - tailLen, fn);
+			var initialFromIndex = (len - tailLen) - elm$core$Array$branchFactor;
+			return A5(elm$core$Array$initializeHelp, fn, initialFromIndex, len, _List_Nil, tail);
+		}
+	});
+var elm$core$Array$repeat = F2(
+	function (n, e) {
+		return A2(
+			elm$core$Array$initialize,
+			n,
+			function (_n0) {
+				return e;
+			});
+	});
+var Kraxorax$elm_matrix_a$Matrix$repeat = F3(
+	function (w, h, a) {
+		return A2(
+			Kraxorax$elm_matrix_a$Matrix$Matrix,
+			w,
+			A2(
+				elm$core$Array$repeat,
+				h,
+				A2(elm$core$Array$repeat, w, a)));
+	});
+var author$project$GejmOfLajf$Mrtva = {$: 'Mrtva'};
+var author$project$GejmOfLajf$Ziva = {$: 'Ziva'};
 var elm$core$List$any = F2(
 	function (isOkay, list) {
 		any:
@@ -4673,7 +4815,7 @@ var elm$core$List$member = F2(
 var author$project$GejmOfLajf$ozivi = F2(
 	function (zivi, boardSize) {
 		return A2(
-			author$project$Matrix$indexedMap,
+			Kraxorax$elm_matrix_a$Matrix$indexedMap,
 			F3(
 				function (x, y, c) {
 					return A2(
@@ -4681,9 +4823,8 @@ var author$project$GejmOfLajf$ozivi = F2(
 						_Utils_Tuple2(x, y),
 						zivi) ? author$project$GejmOfLajf$Ziva : author$project$GejmOfLajf$Mrtva;
 				}),
-			A3(author$project$Matrix$repeat, boardSize, boardSize, author$project$GejmOfLajf$Mrtva));
+			A3(Kraxorax$elm_matrix_a$Matrix$repeat, boardSize, boardSize, author$project$GejmOfLajf$Mrtva));
 	});
-var author$project$Matrix$Neighbours$Torus = {$: 'Torus'};
 var author$project$GejmOfLajf$init = function (zivi) {
 	return A8(
 		author$project$GejmOfLajf$Model,
@@ -4694,29 +4835,19 @@ var author$project$GejmOfLajf$init = function (zivi) {
 		0,
 		true,
 		author$project$GejmOfLajf$defaultRefreshTime,
-		author$project$Matrix$Neighbours$Torus);
+		Kraxorax$elm_matrix_a$Neighbours$Torus);
 };
-var elm$core$Basics$apL = F2(
-	function (f, x) {
-		return f(x);
-	});
-var elm$core$Basics$floor = _Basics_floor;
 var elm$core$Basics$pow = _Basics_pow;
-var elm$core$Basics$toFloat = _Basics_toFloat;
 var elm$core$Basics$identity = function (x) {
 	return x;
 };
-var elm$core$Basics$lt = _Utils_lt;
 var elm$core$Basics$negate = function (n) {
 	return -n;
 };
-var elm$core$Basics$remainderBy = _Basics_remainderBy;
 var elm$core$Bitwise$and = _Bitwise_and;
-var elm$core$Bitwise$shiftRightZfBy = _Bitwise_shiftRightZfBy;
 var elm$random$Random$Generator = function (a) {
 	return {$: 'Generator', a: a};
 };
-var elm$core$Basics$mul = _Basics_mul;
 var elm$random$Random$Seed = F2(
 	function (a, b) {
 		return {$: 'Seed', a: a, b: b};
@@ -4869,10 +5000,6 @@ var author$project$Main$RandomGen = function (a) {
 var author$project$Routing$Druga = {$: 'Druga'};
 var author$project$Routing$GOL = {$: 'GOL'};
 var author$project$Routing$Prva = {$: 'Prva'};
-var elm$core$Basics$gt = _Utils_gt;
-var elm$core$List$reverse = function (list) {
-	return A3(elm$core$List$foldl, elm$core$List$cons, _List_Nil, list);
-};
 var elm$core$List$foldrHelper = F4(
 	function (fn, acc, ctr, ls) {
 		if (!ls.b) {
@@ -5697,6 +5824,11 @@ var elm$core$Maybe$withDefault = F2(
 		}
 	});
 var author$project$Routing$routeFromResult = elm$core$Maybe$withDefault(author$project$Routing$Druga);
+var elm$core$Basics$composeR = F3(
+	function (f, g, x) {
+		return g(
+			f(x));
+	});
 var author$project$Routing$routeLocation = A2(elm$core$Basics$composeR, author$project$Routing$parseRoute, author$project$Routing$routeFromResult);
 var avh4$elm_color$Color$darkGray = A4(avh4$elm_color$Color$RgbaSpace, 186 / 255, 189 / 255, 182 / 255, 1.0);
 var avh4$elm_color$Color$green = A4(avh4$elm_color$Color$RgbaSpace, 115 / 255, 210 / 255, 22 / 255, 1.0);
@@ -5751,136 +5883,6 @@ var elm$core$Result$isOk = function (result) {
 		return false;
 	}
 };
-var elm$core$Array$branchFactor = 32;
-var elm$core$Array$Array_elm_builtin = F4(
-	function (a, b, c, d) {
-		return {$: 'Array_elm_builtin', a: a, b: b, c: c, d: d};
-	});
-var elm$core$Basics$ceiling = _Basics_ceiling;
-var elm$core$Basics$logBase = F2(
-	function (base, number) {
-		return _Basics_log(number) / _Basics_log(base);
-	});
-var elm$core$Array$shiftStep = elm$core$Basics$ceiling(
-	A2(elm$core$Basics$logBase, 2, elm$core$Array$branchFactor));
-var elm$core$Elm$JsArray$empty = _JsArray_empty;
-var elm$core$Array$empty = A4(elm$core$Array$Array_elm_builtin, 0, elm$core$Array$shiftStep, elm$core$Elm$JsArray$empty, elm$core$Elm$JsArray$empty);
-var elm$core$Array$Leaf = function (a) {
-	return {$: 'Leaf', a: a};
-};
-var elm$core$Array$SubTree = function (a) {
-	return {$: 'SubTree', a: a};
-};
-var elm$core$Elm$JsArray$initializeFromList = _JsArray_initializeFromList;
-var elm$core$Array$compressNodes = F2(
-	function (nodes, acc) {
-		compressNodes:
-		while (true) {
-			var _n0 = A2(elm$core$Elm$JsArray$initializeFromList, elm$core$Array$branchFactor, nodes);
-			var node = _n0.a;
-			var remainingNodes = _n0.b;
-			var newAcc = A2(
-				elm$core$List$cons,
-				elm$core$Array$SubTree(node),
-				acc);
-			if (!remainingNodes.b) {
-				return elm$core$List$reverse(newAcc);
-			} else {
-				var $temp$nodes = remainingNodes,
-					$temp$acc = newAcc;
-				nodes = $temp$nodes;
-				acc = $temp$acc;
-				continue compressNodes;
-			}
-		}
-	});
-var elm$core$Tuple$first = function (_n0) {
-	var x = _n0.a;
-	return x;
-};
-var elm$core$Array$treeFromBuilder = F2(
-	function (nodeList, nodeListSize) {
-		treeFromBuilder:
-		while (true) {
-			var newNodeSize = elm$core$Basics$ceiling(nodeListSize / elm$core$Array$branchFactor);
-			if (newNodeSize === 1) {
-				return A2(elm$core$Elm$JsArray$initializeFromList, elm$core$Array$branchFactor, nodeList).a;
-			} else {
-				var $temp$nodeList = A2(elm$core$Array$compressNodes, nodeList, _List_Nil),
-					$temp$nodeListSize = newNodeSize;
-				nodeList = $temp$nodeList;
-				nodeListSize = $temp$nodeListSize;
-				continue treeFromBuilder;
-			}
-		}
-	});
-var elm$core$Basics$max = F2(
-	function (x, y) {
-		return (_Utils_cmp(x, y) > 0) ? x : y;
-	});
-var elm$core$Elm$JsArray$length = _JsArray_length;
-var elm$core$Array$builderToArray = F2(
-	function (reverseNodeList, builder) {
-		if (!builder.nodeListSize) {
-			return A4(
-				elm$core$Array$Array_elm_builtin,
-				elm$core$Elm$JsArray$length(builder.tail),
-				elm$core$Array$shiftStep,
-				elm$core$Elm$JsArray$empty,
-				builder.tail);
-		} else {
-			var treeLen = builder.nodeListSize * elm$core$Array$branchFactor;
-			var depth = elm$core$Basics$floor(
-				A2(elm$core$Basics$logBase, elm$core$Array$branchFactor, treeLen - 1));
-			var correctNodeList = reverseNodeList ? elm$core$List$reverse(builder.nodeList) : builder.nodeList;
-			var tree = A2(elm$core$Array$treeFromBuilder, correctNodeList, builder.nodeListSize);
-			return A4(
-				elm$core$Array$Array_elm_builtin,
-				elm$core$Elm$JsArray$length(builder.tail) + treeLen,
-				A2(elm$core$Basics$max, 5, depth * elm$core$Array$shiftStep),
-				tree,
-				builder.tail);
-		}
-	});
-var elm$core$Basics$idiv = _Basics_idiv;
-var elm$core$Elm$JsArray$initialize = _JsArray_initialize;
-var elm$core$Array$initializeHelp = F5(
-	function (fn, fromIndex, len, nodeList, tail) {
-		initializeHelp:
-		while (true) {
-			if (fromIndex < 0) {
-				return A2(
-					elm$core$Array$builderToArray,
-					false,
-					{nodeList: nodeList, nodeListSize: (len / elm$core$Array$branchFactor) | 0, tail: tail});
-			} else {
-				var leaf = elm$core$Array$Leaf(
-					A3(elm$core$Elm$JsArray$initialize, elm$core$Array$branchFactor, fromIndex, fn));
-				var $temp$fn = fn,
-					$temp$fromIndex = fromIndex - elm$core$Array$branchFactor,
-					$temp$len = len,
-					$temp$nodeList = A2(elm$core$List$cons, leaf, nodeList),
-					$temp$tail = tail;
-				fn = $temp$fn;
-				fromIndex = $temp$fromIndex;
-				len = $temp$len;
-				nodeList = $temp$nodeList;
-				tail = $temp$tail;
-				continue initializeHelp;
-			}
-		}
-	});
-var elm$core$Array$initialize = F2(
-	function (len, fn) {
-		if (len <= 0) {
-			return elm$core$Array$empty;
-		} else {
-			var tailLen = len % elm$core$Array$branchFactor;
-			var tail = A3(elm$core$Elm$JsArray$initialize, tailLen, len - tailLen, fn);
-			var initialFromIndex = (len - tailLen) - elm$core$Array$branchFactor;
-			return A5(elm$core$Array$initializeHelp, fn, initialFromIndex, len, _List_Nil, tail);
-		}
-	});
 var elm$core$Result$Err = function (a) {
 	return {$: 'Err', a: a};
 };
@@ -5923,6 +5925,49 @@ var elm$core$Char$isDigit = function (_char) {
 var elm$core$Char$isAlphaNum = function (_char) {
 	return elm$core$Char$isLower(_char) || (elm$core$Char$isUpper(_char) || elm$core$Char$isDigit(_char));
 };
+var elm$core$List$length = function (xs) {
+	return A3(
+		elm$core$List$foldl,
+		F2(
+			function (_n0, i) {
+				return i + 1;
+			}),
+		0,
+		xs);
+};
+var elm$core$List$map2 = _List_map2;
+var elm$core$List$rangeHelp = F3(
+	function (lo, hi, list) {
+		rangeHelp:
+		while (true) {
+			if (_Utils_cmp(lo, hi) < 1) {
+				var $temp$lo = lo,
+					$temp$hi = hi - 1,
+					$temp$list = A2(elm$core$List$cons, hi, list);
+				lo = $temp$lo;
+				hi = $temp$hi;
+				list = $temp$list;
+				continue rangeHelp;
+			} else {
+				return list;
+			}
+		}
+	});
+var elm$core$List$range = F2(
+	function (lo, hi) {
+		return A3(elm$core$List$rangeHelp, lo, hi, _List_Nil);
+	});
+var elm$core$List$indexedMap = F2(
+	function (f, xs) {
+		return A3(
+			elm$core$List$map2,
+			f,
+			A2(
+				elm$core$List$range,
+				0,
+				elm$core$List$length(xs) - 1),
+			xs);
+	});
 var elm$core$String$all = _String_all;
 var elm$core$String$join = F2(
 	function (sep, chunks) {
@@ -6879,14 +6924,334 @@ var author$project$Forma$update = F2(
 					elm$core$Platform$Cmd$none);
 		}
 	});
-var author$project$GejmOfLajf$isZiva = function (c) {
-	if (c.$ === 'Ziva') {
-		return true;
+var elm$core$Array$bitMask = 4294967295 >>> (32 - elm$core$Array$shiftStep);
+var elm$core$Elm$JsArray$unsafeGet = _JsArray_unsafeGet;
+var elm$core$Array$getHelp = F3(
+	function (shift, index, tree) {
+		getHelp:
+		while (true) {
+			var pos = elm$core$Array$bitMask & (index >>> shift);
+			var _n0 = A2(elm$core$Elm$JsArray$unsafeGet, pos, tree);
+			if (_n0.$ === 'SubTree') {
+				var subTree = _n0.a;
+				var $temp$shift = shift - elm$core$Array$shiftStep,
+					$temp$index = index,
+					$temp$tree = subTree;
+				shift = $temp$shift;
+				index = $temp$index;
+				tree = $temp$tree;
+				continue getHelp;
+			} else {
+				var values = _n0.a;
+				return A2(elm$core$Elm$JsArray$unsafeGet, elm$core$Array$bitMask & index, values);
+			}
+		}
+	});
+var elm$core$Basics$ge = _Utils_ge;
+var elm$core$Array$get = F2(
+	function (index, _n0) {
+		var len = _n0.a;
+		var startShift = _n0.b;
+		var tree = _n0.c;
+		var tail = _n0.d;
+		return ((index < 0) || (_Utils_cmp(index, len) > -1)) ? elm$core$Maybe$Nothing : ((_Utils_cmp(
+			index,
+			elm$core$Array$tailIndex(len)) > -1) ? elm$core$Maybe$Just(
+			A2(elm$core$Elm$JsArray$unsafeGet, elm$core$Array$bitMask & index, tail)) : elm$core$Maybe$Just(
+			A3(elm$core$Array$getHelp, startShift, index, tree)));
+	});
+var Kraxorax$elm_matrix_a$Matrix$getRow = F2(
+	function (y, _n0) {
+		var m = _n0.b;
+		var _n1 = A2(elm$core$Array$get, y, m);
+		if (_n1.$ === 'Just') {
+			var x = _n1.a;
+			return elm$core$Result$Ok(x);
+		} else {
+			return elm$core$Result$Err('Matrix: Row index out of bounds');
+		}
+	});
+var elm$core$Elm$JsArray$appendN = _JsArray_appendN;
+var elm$core$Elm$JsArray$slice = _JsArray_slice;
+var elm$core$Array$appendHelpBuilder = F2(
+	function (tail, builder) {
+		var tailLen = elm$core$Elm$JsArray$length(tail);
+		var notAppended = (elm$core$Array$branchFactor - elm$core$Elm$JsArray$length(builder.tail)) - tailLen;
+		var appended = A3(elm$core$Elm$JsArray$appendN, elm$core$Array$branchFactor, builder.tail, tail);
+		return (notAppended < 0) ? {
+			nodeList: A2(
+				elm$core$List$cons,
+				elm$core$Array$Leaf(appended),
+				builder.nodeList),
+			nodeListSize: builder.nodeListSize + 1,
+			tail: A3(elm$core$Elm$JsArray$slice, notAppended, tailLen, tail)
+		} : ((!notAppended) ? {
+			nodeList: A2(
+				elm$core$List$cons,
+				elm$core$Array$Leaf(appended),
+				builder.nodeList),
+			nodeListSize: builder.nodeListSize + 1,
+			tail: elm$core$Elm$JsArray$empty
+		} : {nodeList: builder.nodeList, nodeListSize: builder.nodeListSize, tail: appended});
+	});
+var elm$core$Elm$JsArray$push = _JsArray_push;
+var elm$core$Elm$JsArray$singleton = _JsArray_singleton;
+var elm$core$Elm$JsArray$unsafeSet = _JsArray_unsafeSet;
+var elm$core$Array$insertTailInTree = F4(
+	function (shift, index, tail, tree) {
+		var pos = elm$core$Array$bitMask & (index >>> shift);
+		if (_Utils_cmp(
+			pos,
+			elm$core$Elm$JsArray$length(tree)) > -1) {
+			if (shift === 5) {
+				return A2(
+					elm$core$Elm$JsArray$push,
+					elm$core$Array$Leaf(tail),
+					tree);
+			} else {
+				var newSub = elm$core$Array$SubTree(
+					A4(elm$core$Array$insertTailInTree, shift - elm$core$Array$shiftStep, index, tail, elm$core$Elm$JsArray$empty));
+				return A2(elm$core$Elm$JsArray$push, newSub, tree);
+			}
+		} else {
+			var value = A2(elm$core$Elm$JsArray$unsafeGet, pos, tree);
+			if (value.$ === 'SubTree') {
+				var subTree = value.a;
+				var newSub = elm$core$Array$SubTree(
+					A4(elm$core$Array$insertTailInTree, shift - elm$core$Array$shiftStep, index, tail, subTree));
+				return A3(elm$core$Elm$JsArray$unsafeSet, pos, newSub, tree);
+			} else {
+				var newSub = elm$core$Array$SubTree(
+					A4(
+						elm$core$Array$insertTailInTree,
+						shift - elm$core$Array$shiftStep,
+						index,
+						tail,
+						elm$core$Elm$JsArray$singleton(value)));
+				return A3(elm$core$Elm$JsArray$unsafeSet, pos, newSub, tree);
+			}
+		}
+	});
+var elm$core$Array$unsafeReplaceTail = F2(
+	function (newTail, _n0) {
+		var len = _n0.a;
+		var startShift = _n0.b;
+		var tree = _n0.c;
+		var tail = _n0.d;
+		var originalTailLen = elm$core$Elm$JsArray$length(tail);
+		var newTailLen = elm$core$Elm$JsArray$length(newTail);
+		var newArrayLen = len + (newTailLen - originalTailLen);
+		if (_Utils_eq(newTailLen, elm$core$Array$branchFactor)) {
+			var overflow = _Utils_cmp(newArrayLen >>> elm$core$Array$shiftStep, 1 << startShift) > 0;
+			if (overflow) {
+				var newShift = startShift + elm$core$Array$shiftStep;
+				var newTree = A4(
+					elm$core$Array$insertTailInTree,
+					newShift,
+					len,
+					newTail,
+					elm$core$Elm$JsArray$singleton(
+						elm$core$Array$SubTree(tree)));
+				return A4(elm$core$Array$Array_elm_builtin, newArrayLen, newShift, newTree, elm$core$Elm$JsArray$empty);
+			} else {
+				return A4(
+					elm$core$Array$Array_elm_builtin,
+					newArrayLen,
+					startShift,
+					A4(elm$core$Array$insertTailInTree, startShift, len, newTail, tree),
+					elm$core$Elm$JsArray$empty);
+			}
+		} else {
+			return A4(elm$core$Array$Array_elm_builtin, newArrayLen, startShift, tree, newTail);
+		}
+	});
+var elm$core$Array$appendHelpTree = F2(
+	function (toAppend, array) {
+		var len = array.a;
+		var tree = array.c;
+		var tail = array.d;
+		var itemsToAppend = elm$core$Elm$JsArray$length(toAppend);
+		var notAppended = (elm$core$Array$branchFactor - elm$core$Elm$JsArray$length(tail)) - itemsToAppend;
+		var appended = A3(elm$core$Elm$JsArray$appendN, elm$core$Array$branchFactor, tail, toAppend);
+		var newArray = A2(elm$core$Array$unsafeReplaceTail, appended, array);
+		if (notAppended < 0) {
+			var nextTail = A3(elm$core$Elm$JsArray$slice, notAppended, itemsToAppend, toAppend);
+			return A2(elm$core$Array$unsafeReplaceTail, nextTail, newArray);
+		} else {
+			return newArray;
+		}
+	});
+var elm$core$Array$builderFromArray = function (_n0) {
+	var len = _n0.a;
+	var tree = _n0.c;
+	var tail = _n0.d;
+	var helper = F2(
+		function (node, acc) {
+			if (node.$ === 'SubTree') {
+				var subTree = node.a;
+				return A3(elm$core$Elm$JsArray$foldl, helper, acc, subTree);
+			} else {
+				return A2(elm$core$List$cons, node, acc);
+			}
+		});
+	return {
+		nodeList: A3(elm$core$Elm$JsArray$foldl, helper, _List_Nil, tree),
+		nodeListSize: (len / elm$core$Array$branchFactor) | 0,
+		tail: tail
+	};
+};
+var elm$core$Array$append = F2(
+	function (a, _n0) {
+		var aTail = a.d;
+		var bLen = _n0.a;
+		var bTree = _n0.c;
+		var bTail = _n0.d;
+		if (_Utils_cmp(bLen, elm$core$Array$branchFactor * 4) < 1) {
+			var foldHelper = F2(
+				function (node, array) {
+					if (node.$ === 'SubTree') {
+						var tree = node.a;
+						return A3(elm$core$Elm$JsArray$foldl, foldHelper, array, tree);
+					} else {
+						var leaf = node.a;
+						return A2(elm$core$Array$appendHelpTree, leaf, array);
+					}
+				});
+			return A2(
+				elm$core$Array$appendHelpTree,
+				bTail,
+				A3(elm$core$Elm$JsArray$foldl, foldHelper, a, bTree));
+		} else {
+			var foldHelper = F2(
+				function (node, builder) {
+					if (node.$ === 'SubTree') {
+						var tree = node.a;
+						return A3(elm$core$Elm$JsArray$foldl, foldHelper, builder, tree);
+					} else {
+						var leaf = node.a;
+						return A2(elm$core$Array$appendHelpBuilder, leaf, builder);
+					}
+				});
+			return A2(
+				elm$core$Array$builderToArray,
+				true,
+				A2(
+					elm$core$Array$appendHelpBuilder,
+					bTail,
+					A3(
+						elm$core$Elm$JsArray$foldl,
+						foldHelper,
+						elm$core$Array$builderFromArray(a),
+						bTree)));
+		}
+	});
+var Kraxorax$elm_matrix_a$Neighbours$flatten = A2(elm$core$Array$foldr, elm$core$Array$append, elm$core$Array$empty);
+var elm$core$Array$length = function (_n0) {
+	var len = _n0.a;
+	return len;
+};
+var Kraxorax$elm_matrix_a$Matrix$height = function (_n0) {
+	var m = _n0.b;
+	return elm$core$Array$length(m);
+};
+var elm$core$Result$withDefault = F2(
+	function (def, result) {
+		if (result.$ === 'Ok') {
+			var a = result.a;
+			return a;
+		} else {
+			return def;
+		}
+	});
+var Kraxorax$elm_matrix_a$Neighbours$orEmpty = elm$core$Result$withDefault(elm$core$Array$empty);
+var elm$core$Array$fromListHelp = F3(
+	function (list, nodeList, nodeListSize) {
+		fromListHelp:
+		while (true) {
+			var _n0 = A2(elm$core$Elm$JsArray$initializeFromList, elm$core$Array$branchFactor, list);
+			var jsArray = _n0.a;
+			var remainingItems = _n0.b;
+			if (_Utils_cmp(
+				elm$core$Elm$JsArray$length(jsArray),
+				elm$core$Array$branchFactor) < 0) {
+				return A2(
+					elm$core$Array$builderToArray,
+					true,
+					{nodeList: nodeList, nodeListSize: nodeListSize, tail: jsArray});
+			} else {
+				var $temp$list = remainingItems,
+					$temp$nodeList = A2(
+					elm$core$List$cons,
+					elm$core$Array$Leaf(jsArray),
+					nodeList),
+					$temp$nodeListSize = nodeListSize + 1;
+				list = $temp$list;
+				nodeList = $temp$nodeList;
+				nodeListSize = $temp$nodeListSize;
+				continue fromListHelp;
+			}
+		}
+	});
+var elm$core$Array$fromList = function (list) {
+	if (!list.b) {
+		return elm$core$Array$empty;
 	} else {
-		return false;
+		return A3(elm$core$Array$fromListHelp, list, _List_Nil, 0);
 	}
 };
-var elm$core$Basics$ge = _Utils_ge;
+var elm$core$Elm$JsArray$map = _JsArray_map;
+var elm$core$Array$map = F2(
+	function (func, _n0) {
+		var len = _n0.a;
+		var startShift = _n0.b;
+		var tree = _n0.c;
+		var tail = _n0.d;
+		var helper = function (node) {
+			if (node.$ === 'SubTree') {
+				var subTree = node.a;
+				return elm$core$Array$SubTree(
+					A2(elm$core$Elm$JsArray$map, helper, subTree));
+			} else {
+				var values = node.a;
+				return elm$core$Array$Leaf(
+					A2(elm$core$Elm$JsArray$map, func, values));
+			}
+		};
+		return A4(
+			elm$core$Array$Array_elm_builtin,
+			len,
+			startShift,
+			A2(elm$core$Elm$JsArray$map, helper, tree),
+			A2(elm$core$Elm$JsArray$map, func, tail));
+	});
+var Kraxorax$elm_matrix_a$Neighbours$getBoundSideRows = F2(
+	function (y, m) {
+		return (!y) ? A2(
+			elm$core$Array$repeat,
+			1,
+			Kraxorax$elm_matrix_a$Neighbours$orEmpty(
+				A2(Kraxorax$elm_matrix_a$Matrix$getRow, 1, m))) : (_Utils_eq(
+			y,
+			Kraxorax$elm_matrix_a$Matrix$height(m) - 1) ? A2(
+			elm$core$Array$repeat,
+			1,
+			Kraxorax$elm_matrix_a$Neighbours$orEmpty(
+				A2(Kraxorax$elm_matrix_a$Matrix$getRow, y - 1, m))) : A2(
+			elm$core$Array$map,
+			Kraxorax$elm_matrix_a$Neighbours$orEmpty,
+			elm$core$Array$fromList(
+				A2(
+					elm$core$List$cons,
+					A2(Kraxorax$elm_matrix_a$Matrix$getRow, y - 1, m),
+					_List_fromArray(
+						[
+							A2(Kraxorax$elm_matrix_a$Matrix$getRow, y + 1, m)
+						])))));
+	});
+var Kraxorax$elm_matrix_a$Neighbours$modulo = F2(
+	function (a, m) {
+		return (a < 0) ? (m + a) : ((_Utils_cmp(a, m) > -1) ? (m - a) : a);
+	});
 var elm$core$List$drop = F2(
 	function (n, list) {
 		drop:
@@ -6908,341 +7273,321 @@ var elm$core$List$drop = F2(
 			}
 		}
 	});
-var elm$core$List$head = function (list) {
-	if (list.b) {
-		var x = list.a;
-		var xs = list.b;
-		return elm$core$Maybe$Just(x);
-	} else {
-		return elm$core$Maybe$Nothing;
-	}
-};
-var author$project$Matrix$getRow = function (y) {
-	return (y >= 0) ? A2(
-		elm$core$Basics$composeR,
-		elm$core$List$drop(y),
-		elm$core$List$head) : function (_n0) {
-		return elm$core$Maybe$Nothing;
-	};
-};
-var author$project$Matrix$height = elm$core$List$length;
-var author$project$Matrix$width = A2(
-	elm$core$Basics$composeR,
-	elm$core$List$head,
-	A2(
-		elm$core$Basics$composeR,
-		elm$core$Maybe$withDefault(_List_Nil),
-		elm$core$List$length));
-var author$project$Matrix$Neighbours$modulo = F2(
-	function (a, m) {
-		return (a < 0) ? (m + a) : ((_Utils_cmp(a, m) > -1) ? (m - a) : a);
-	});
-var elm$core$List$takeReverse = F3(
-	function (n, list, kept) {
-		takeReverse:
-		while (true) {
-			if (n <= 0) {
-				return kept;
-			} else {
-				if (!list.b) {
-					return kept;
-				} else {
-					var x = list.a;
-					var xs = list.b;
-					var $temp$n = n - 1,
-						$temp$list = xs,
-						$temp$kept = A2(elm$core$List$cons, x, kept);
-					n = $temp$n;
-					list = $temp$list;
-					kept = $temp$kept;
-					continue takeReverse;
-				}
-			}
-		}
-	});
-var elm$core$List$takeTailRec = F2(
-	function (n, list) {
-		return elm$core$List$reverse(
-			A3(elm$core$List$takeReverse, n, list, _List_Nil));
-	});
-var elm$core$List$takeFast = F3(
-	function (ctr, n, list) {
-		if (n <= 0) {
-			return _List_Nil;
+var elm$core$Array$sliceLeft = F2(
+	function (from, array) {
+		var len = array.a;
+		var tree = array.c;
+		var tail = array.d;
+		if (!from) {
+			return array;
 		} else {
-			var _n0 = _Utils_Tuple2(n, list);
-			_n0$1:
-			while (true) {
-				_n0$5:
-				while (true) {
-					if (!_n0.b.b) {
-						return list;
-					} else {
-						if (_n0.b.b.b) {
-							switch (_n0.a) {
-								case 1:
-									break _n0$1;
-								case 2:
-									var _n2 = _n0.b;
-									var x = _n2.a;
-									var _n3 = _n2.b;
-									var y = _n3.a;
-									return _List_fromArray(
-										[x, y]);
-								case 3:
-									if (_n0.b.b.b.b) {
-										var _n4 = _n0.b;
-										var x = _n4.a;
-										var _n5 = _n4.b;
-										var y = _n5.a;
-										var _n6 = _n5.b;
-										var z = _n6.a;
-										return _List_fromArray(
-											[x, y, z]);
-									} else {
-										break _n0$5;
-									}
-								default:
-									if (_n0.b.b.b.b && _n0.b.b.b.b.b) {
-										var _n7 = _n0.b;
-										var x = _n7.a;
-										var _n8 = _n7.b;
-										var y = _n8.a;
-										var _n9 = _n8.b;
-										var z = _n9.a;
-										var _n10 = _n9.b;
-										var w = _n10.a;
-										var tl = _n10.b;
-										return (ctr > 1000) ? A2(
-											elm$core$List$cons,
-											x,
-											A2(
-												elm$core$List$cons,
-												y,
-												A2(
-													elm$core$List$cons,
-													z,
-													A2(
-														elm$core$List$cons,
-														w,
-														A2(elm$core$List$takeTailRec, n - 4, tl))))) : A2(
-											elm$core$List$cons,
-											x,
-											A2(
-												elm$core$List$cons,
-												y,
-												A2(
-													elm$core$List$cons,
-													z,
-													A2(
-														elm$core$List$cons,
-														w,
-														A3(elm$core$List$takeFast, ctr + 1, n - 4, tl)))));
-									} else {
-										break _n0$5;
-									}
-							}
+			if (_Utils_cmp(
+				from,
+				elm$core$Array$tailIndex(len)) > -1) {
+				return A4(
+					elm$core$Array$Array_elm_builtin,
+					len - from,
+					elm$core$Array$shiftStep,
+					elm$core$Elm$JsArray$empty,
+					A3(
+						elm$core$Elm$JsArray$slice,
+						from - elm$core$Array$tailIndex(len),
+						elm$core$Elm$JsArray$length(tail),
+						tail));
+			} else {
+				var skipNodes = (from / elm$core$Array$branchFactor) | 0;
+				var helper = F2(
+					function (node, acc) {
+						if (node.$ === 'SubTree') {
+							var subTree = node.a;
+							return A3(elm$core$Elm$JsArray$foldr, helper, acc, subTree);
 						} else {
-							if (_n0.a === 1) {
-								break _n0$1;
-							} else {
-								break _n0$5;
-							}
+							var leaf = node.a;
+							return A2(elm$core$List$cons, leaf, acc);
 						}
-					}
+					});
+				var leafNodes = A3(
+					elm$core$Elm$JsArray$foldr,
+					helper,
+					_List_fromArray(
+						[tail]),
+					tree);
+				var nodesToInsert = A2(elm$core$List$drop, skipNodes, leafNodes);
+				if (!nodesToInsert.b) {
+					return elm$core$Array$empty;
+				} else {
+					var head = nodesToInsert.a;
+					var rest = nodesToInsert.b;
+					var firstSlice = from - (skipNodes * elm$core$Array$branchFactor);
+					var initialBuilder = {
+						nodeList: _List_Nil,
+						nodeListSize: 0,
+						tail: A3(
+							elm$core$Elm$JsArray$slice,
+							firstSlice,
+							elm$core$Elm$JsArray$length(head),
+							head)
+					};
+					return A2(
+						elm$core$Array$builderToArray,
+						true,
+						A3(elm$core$List$foldl, elm$core$Array$appendHelpBuilder, initialBuilder, rest));
 				}
-				return list;
 			}
-			var _n1 = _n0.b;
-			var x = _n1.a;
-			return _List_fromArray(
-				[x]);
 		}
 	});
-var elm$core$List$take = F2(
-	function (n, list) {
-		return A3(elm$core$List$takeFast, 0, n, list);
+var elm$core$Array$fetchNewTail = F4(
+	function (shift, end, treeEnd, tree) {
+		fetchNewTail:
+		while (true) {
+			var pos = elm$core$Array$bitMask & (treeEnd >>> shift);
+			var _n0 = A2(elm$core$Elm$JsArray$unsafeGet, pos, tree);
+			if (_n0.$ === 'SubTree') {
+				var sub = _n0.a;
+				var $temp$shift = shift - elm$core$Array$shiftStep,
+					$temp$end = end,
+					$temp$treeEnd = treeEnd,
+					$temp$tree = sub;
+				shift = $temp$shift;
+				end = $temp$end;
+				treeEnd = $temp$treeEnd;
+				tree = $temp$tree;
+				continue fetchNewTail;
+			} else {
+				var values = _n0.a;
+				return A3(elm$core$Elm$JsArray$slice, 0, elm$core$Array$bitMask & end, values);
+			}
+		}
 	});
-var author$project$Matrix$Neighbours$unboundHorizontalCenter = F3(
-	function (start, end, l) {
-		return A2(
-			elm$core$List$append,
-			A2(
-				elm$core$List$take,
-				1,
-				A2(elm$core$List$drop, end, l)),
-			A2(
-				elm$core$List$take,
-				1,
-				A2(elm$core$List$drop, start, l)));
+var elm$core$Array$hoistTree = F3(
+	function (oldShift, newShift, tree) {
+		hoistTree:
+		while (true) {
+			if ((_Utils_cmp(oldShift, newShift) < 1) || (!elm$core$Elm$JsArray$length(tree))) {
+				return tree;
+			} else {
+				var _n0 = A2(elm$core$Elm$JsArray$unsafeGet, 0, tree);
+				if (_n0.$ === 'SubTree') {
+					var sub = _n0.a;
+					var $temp$oldShift = oldShift - elm$core$Array$shiftStep,
+						$temp$newShift = newShift,
+						$temp$tree = sub;
+					oldShift = $temp$oldShift;
+					newShift = $temp$newShift;
+					tree = $temp$tree;
+					continue hoistTree;
+				} else {
+					return tree;
+				}
+			}
+		}
 	});
-var author$project$Matrix$Neighbours$unboundHorizontalSide = F3(
-	function (start, end, l) {
-		return (_Utils_cmp(end, start) < 0) ? A2(
-			elm$core$List$append,
-			A2(
-				elm$core$List$take,
-				3,
-				A2(elm$core$List$drop, start, l)),
-			A2(elm$core$List$take, end + 1, l)) : A2(
-			elm$core$List$take,
-			3,
-			A2(elm$core$List$drop, start, l));
+var elm$core$Array$sliceTree = F3(
+	function (shift, endIdx, tree) {
+		var lastPos = elm$core$Array$bitMask & (endIdx >>> shift);
+		var _n0 = A2(elm$core$Elm$JsArray$unsafeGet, lastPos, tree);
+		if (_n0.$ === 'SubTree') {
+			var sub = _n0.a;
+			var newSub = A3(elm$core$Array$sliceTree, shift - elm$core$Array$shiftStep, endIdx, sub);
+			return (!elm$core$Elm$JsArray$length(newSub)) ? A3(elm$core$Elm$JsArray$slice, 0, lastPos, tree) : A3(
+				elm$core$Elm$JsArray$unsafeSet,
+				lastPos,
+				elm$core$Array$SubTree(newSub),
+				A3(elm$core$Elm$JsArray$slice, 0, lastPos + 1, tree));
+		} else {
+			return A3(elm$core$Elm$JsArray$slice, 0, lastPos, tree);
+		}
 	});
-var author$project$Matrix$Neighbours$neighboursOnHorizontalStrip = F3(
-	function (x, y, m) {
-		var rowSides = A2(
-			elm$core$List$map,
-			elm$core$Maybe$withDefault(_List_Nil),
-			A2(
-				elm$core$List$cons,
-				A2(author$project$Matrix$getRow, y - 1, m),
-				_List_fromArray(
-					[
-						A2(author$project$Matrix$getRow, y + 1, m)
-					])));
-		var rowCenter = A2(
-			elm$core$Maybe$withDefault,
-			_List_Nil,
-			A2(author$project$Matrix$getRow, y, m));
-		var mw = author$project$Matrix$width(m);
-		var start = A2(author$project$Matrix$Neighbours$modulo, x - 1, mw);
-		var mh = author$project$Matrix$height(m);
-		var end = A2(author$project$Matrix$Neighbours$modulo, x + 1, mw);
-		return A2(
-			elm$core$List$append,
-			elm$core$List$concat(
-				A2(
-					elm$core$List$map,
-					A2(author$project$Matrix$Neighbours$unboundHorizontalSide, start, end),
-					rowSides)),
-			A3(author$project$Matrix$Neighbours$unboundHorizontalCenter, start, end, rowCenter));
-	});
-var author$project$Matrix$Neighbours$boundHorizontalCenter = F3(
-	function (start, end, l) {
-		return (start < 0) ? A2(
-			elm$core$List$take,
-			1,
-			A2(elm$core$List$drop, end, l)) : A2(
-			elm$core$List$append,
-			A2(
-				elm$core$List$take,
-				1,
-				A2(elm$core$List$drop, end, l)),
-			A2(
-				elm$core$List$take,
-				1,
-				A2(elm$core$List$drop, start, l)));
-	});
-var author$project$Matrix$Neighbours$boundHorizontalSide = F3(
-	function (start, toTake, l) {
-		return A2(
-			elm$core$List$take,
-			toTake,
-			A2(elm$core$List$drop, start, l));
-	});
-var author$project$Matrix$Neighbours$neighboursOnPlane = F3(
-	function (x, y, m) {
-		var startRow = A2(elm$core$Basics$max, y - 1, 0);
-		var start = x - 1;
-		var numToTakeRows = ((y - 1) < 0) ? (3 + (y - 1)) : 3;
-		var rows = A2(
-			elm$core$List$take,
-			numToTakeRows,
-			A2(elm$core$List$drop, startRow, m));
-		var numToTakeCells = (start < 0) ? (3 + start) : 3;
-		var end = x + 1;
-		return elm$core$List$concat(
-			A2(
-				elm$core$List$indexedMap,
-				F2(
-					function (yc, row) {
-						return _Utils_eq(startRow + yc, y) ? A3(author$project$Matrix$Neighbours$boundHorizontalCenter, start, end, row) : A3(author$project$Matrix$Neighbours$boundHorizontalSide, start, numToTakeCells, row);
-					}),
-				rows));
-	});
-var author$project$Matrix$Neighbours$neighboursOnTorus = F3(
-	function (x, y, m) {
-		var r2 = A2(
-			elm$core$Maybe$withDefault,
-			_List_Nil,
-			A2(author$project$Matrix$getRow, y, m));
-		var mw = author$project$Matrix$width(m);
-		var start = A2(author$project$Matrix$Neighbours$modulo, x - 1, mw);
-		var mh = author$project$Matrix$height(m);
-		var r1 = A2(
-			elm$core$Maybe$withDefault,
-			_List_Nil,
-			A2(
-				author$project$Matrix$getRow,
-				A2(author$project$Matrix$Neighbours$modulo, y - 1, mh),
-				m));
-		var r3 = A2(
-			elm$core$Maybe$withDefault,
-			_List_Nil,
-			A2(
-				author$project$Matrix$getRow,
-				A2(author$project$Matrix$Neighbours$modulo, y + 1, mh),
-				m));
-		var end = A2(author$project$Matrix$Neighbours$modulo, x + 1, mw);
-		return A2(
-			elm$core$List$append,
-			A3(author$project$Matrix$Neighbours$unboundHorizontalSide, start, end, r3),
-			A2(
-				elm$core$List$append,
-				A3(author$project$Matrix$Neighbours$unboundHorizontalCenter, start, end, r2),
-				A3(author$project$Matrix$Neighbours$unboundHorizontalSide, start, end, r1)));
-	});
-var author$project$Matrix$Neighbours$neighboursOnVerticalStrip = F3(
-	function (x, y, m) {
-		var start = x - 1;
-		var rowCenter = A2(
-			elm$core$Maybe$withDefault,
-			_List_Nil,
-			A2(author$project$Matrix$getRow, y, m));
-		var numToTakeCells = (start < 0) ? (3 + start) : 3;
-		var mw = author$project$Matrix$width(m);
-		var mh = author$project$Matrix$height(m);
-		var rowSides = A2(
-			elm$core$List$cons,
-			A2(
-				elm$core$Maybe$withDefault,
-				_List_Nil,
-				A2(
-					author$project$Matrix$getRow,
-					A2(author$project$Matrix$Neighbours$modulo, y - 1, mh),
-					m)),
-			A2(
-				elm$core$List$cons,
-				A2(
-					elm$core$Maybe$withDefault,
-					_List_Nil,
+var elm$core$Array$sliceRight = F2(
+	function (end, array) {
+		var len = array.a;
+		var startShift = array.b;
+		var tree = array.c;
+		var tail = array.d;
+		if (_Utils_eq(end, len)) {
+			return array;
+		} else {
+			if (_Utils_cmp(
+				end,
+				elm$core$Array$tailIndex(len)) > -1) {
+				return A4(
+					elm$core$Array$Array_elm_builtin,
+					end,
+					startShift,
+					tree,
+					A3(elm$core$Elm$JsArray$slice, 0, elm$core$Array$bitMask & end, tail));
+			} else {
+				var endIdx = elm$core$Array$tailIndex(end);
+				var depth = elm$core$Basics$floor(
 					A2(
-						author$project$Matrix$getRow,
-						A2(author$project$Matrix$Neighbours$modulo, y + 1, mh),
-						m)),
-				_List_Nil));
-		var sideNbrs = elm$core$List$concat(
+						elm$core$Basics$logBase,
+						elm$core$Array$branchFactor,
+						A2(elm$core$Basics$max, 1, endIdx - 1)));
+				var newShift = A2(elm$core$Basics$max, 5, depth * elm$core$Array$shiftStep);
+				return A4(
+					elm$core$Array$Array_elm_builtin,
+					end,
+					newShift,
+					A3(
+						elm$core$Array$hoistTree,
+						startShift,
+						newShift,
+						A3(elm$core$Array$sliceTree, startShift, endIdx, tree)),
+					A4(elm$core$Array$fetchNewTail, startShift, end, endIdx, tree));
+			}
+		}
+	});
+var elm$core$Array$translateIndex = F2(
+	function (index, _n0) {
+		var len = _n0.a;
+		var posIndex = (index < 0) ? (len + index) : index;
+		return (posIndex < 0) ? 0 : ((_Utils_cmp(posIndex, len) > 0) ? len : posIndex);
+	});
+var elm$core$Array$slice = F3(
+	function (from, to, array) {
+		var correctTo = A2(elm$core$Array$translateIndex, to, array);
+		var correctFrom = A2(elm$core$Array$translateIndex, from, array);
+		return (_Utils_cmp(correctFrom, correctTo) > 0) ? elm$core$Array$empty : A2(
+			elm$core$Array$sliceLeft,
+			correctFrom,
+			A2(elm$core$Array$sliceRight, correctTo, array));
+	});
+var Kraxorax$elm_matrix_a$Neighbours$unboundHorizontalCenter = F2(
+	function (x, row) {
+		var mw = elm$core$Array$length(row);
+		var start = A2(Kraxorax$elm_matrix_a$Neighbours$modulo, x - 1, mw);
+		var end = A2(Kraxorax$elm_matrix_a$Neighbours$modulo, x + 1, mw);
+		return A2(
+			elm$core$Array$append,
+			A3(elm$core$Array$slice, end, end + 1, row),
+			A3(elm$core$Array$slice, start, start + 1, row));
+	});
+var Kraxorax$elm_matrix_a$Neighbours$unboundHorizontalSide = F2(
+	function (x, row) {
+		var mw = elm$core$Array$length(row);
+		var start = A2(Kraxorax$elm_matrix_a$Neighbours$modulo, x - 1, mw);
+		var end = A2(Kraxorax$elm_matrix_a$Neighbours$modulo, x + 1, mw);
+		return (_Utils_cmp(end, start) < 0) ? A2(
+			elm$core$Array$append,
+			A3(elm$core$Array$slice, start, start + 3, row),
+			A3(elm$core$Array$slice, 0, end + 1, row)) : A3(elm$core$Array$slice, start, end + 1, row);
+	});
+var Kraxorax$elm_matrix_a$Neighbours$neighboursOnHorizontalStrip = F3(
+	function (x, y, m) {
+		var rowSides = A2(Kraxorax$elm_matrix_a$Neighbours$getBoundSideRows, y, m);
+		var sideNbrs = Kraxorax$elm_matrix_a$Neighbours$flatten(
 			A2(
-				elm$core$List$map,
+				elm$core$Array$map,
+				Kraxorax$elm_matrix_a$Neighbours$unboundHorizontalSide(x),
+				rowSides));
+		var rowCenter = Kraxorax$elm_matrix_a$Neighbours$orEmpty(
+			A2(Kraxorax$elm_matrix_a$Matrix$getRow, y, m));
+		var centerNbrs = A2(Kraxorax$elm_matrix_a$Neighbours$unboundHorizontalCenter, x, rowCenter);
+		return A2(elm$core$Array$append, sideNbrs, centerNbrs);
+	});
+var Kraxorax$elm_matrix_a$Neighbours$boundHorizontalCenter = F2(
+	function (x, row) {
+		var start = x - 1;
+		var end = x + 1;
+		return (start < 0) ? A3(elm$core$Array$slice, end, end + 1, row) : A2(
+			elm$core$Array$append,
+			A3(elm$core$Array$slice, end, end + 1, row),
+			A3(elm$core$Array$slice, start, start + 1, row));
+	});
+var Kraxorax$elm_matrix_a$Neighbours$boundHorizontalSide = F2(
+	function (x, row) {
+		var start = x - 1;
+		var end = x + 1;
+		return A3(
+			elm$core$Array$slice,
+			A2(elm$core$Basics$max, 0, start),
+			end + 1,
+			row);
+	});
+var Kraxorax$elm_matrix_a$Neighbours$neighboursOnPlane = F3(
+	function (x, y, m) {
+		var rowSides = A2(Kraxorax$elm_matrix_a$Neighbours$getBoundSideRows, y, m);
+		var sideNbrs = Kraxorax$elm_matrix_a$Neighbours$flatten(
+			A2(
+				elm$core$Array$map,
 				function (row) {
-					return A3(author$project$Matrix$Neighbours$boundHorizontalSide, start, numToTakeCells, row);
+					return A2(Kraxorax$elm_matrix_a$Neighbours$boundHorizontalSide, x, row);
 				},
 				rowSides));
-		var end = x + 1;
-		var centerNbrs = A3(author$project$Matrix$Neighbours$boundHorizontalCenter, start, end, rowCenter);
-		return A2(elm$core$List$append, centerNbrs, sideNbrs);
+		var rowCenter = Kraxorax$elm_matrix_a$Neighbours$orEmpty(
+			A2(Kraxorax$elm_matrix_a$Matrix$getRow, y, m));
+		var centerNbrs = A2(Kraxorax$elm_matrix_a$Neighbours$boundHorizontalCenter, x, rowCenter);
+		return A2(elm$core$Array$append, sideNbrs, centerNbrs);
 	});
-var author$project$Matrix$Neighbours$neighbours = function (mt) {
+var Kraxorax$elm_matrix_a$Neighbours$getUnboundSideRows = F2(
+	function (y, m) {
+		var mh = Kraxorax$elm_matrix_a$Matrix$height(m);
+		return elm$core$Array$fromList(
+			A2(
+				elm$core$List$cons,
+				Kraxorax$elm_matrix_a$Neighbours$orEmpty(
+					A2(
+						Kraxorax$elm_matrix_a$Matrix$getRow,
+						A2(Kraxorax$elm_matrix_a$Neighbours$modulo, y - 1, mh),
+						m)),
+				A2(
+					elm$core$List$cons,
+					A2(
+						elm$core$Result$withDefault,
+						elm$core$Array$empty,
+						A2(
+							Kraxorax$elm_matrix_a$Matrix$getRow,
+							A2(Kraxorax$elm_matrix_a$Neighbours$modulo, y + 1, mh),
+							m)),
+					_List_Nil)));
+	});
+var Kraxorax$elm_matrix_a$Neighbours$neighboursOnTorus = F3(
+	function (x, y, m) {
+		var rowSides = A2(Kraxorax$elm_matrix_a$Neighbours$getUnboundSideRows, y, m);
+		var sideNbrs = Kraxorax$elm_matrix_a$Neighbours$flatten(
+			A2(
+				elm$core$Array$map,
+				function (row) {
+					return A2(Kraxorax$elm_matrix_a$Neighbours$unboundHorizontalSide, x, row);
+				},
+				rowSides));
+		var rowCenter = Kraxorax$elm_matrix_a$Neighbours$orEmpty(
+			A2(Kraxorax$elm_matrix_a$Matrix$getRow, y, m));
+		var centerNbrs = A2(Kraxorax$elm_matrix_a$Neighbours$unboundHorizontalCenter, x, rowCenter);
+		return A2(elm$core$Array$append, sideNbrs, centerNbrs);
+	});
+var Kraxorax$elm_matrix_a$Neighbours$neighboursOnVerticalStrip = F3(
+	function (x, y, m) {
+		var rowSides = A2(Kraxorax$elm_matrix_a$Neighbours$getUnboundSideRows, y, m);
+		var sideNbrs = Kraxorax$elm_matrix_a$Neighbours$flatten(
+			A2(
+				elm$core$Array$map,
+				function (row) {
+					return A2(Kraxorax$elm_matrix_a$Neighbours$boundHorizontalSide, x, row);
+				},
+				rowSides));
+		var rowCenter = Kraxorax$elm_matrix_a$Neighbours$orEmpty(
+			A2(Kraxorax$elm_matrix_a$Matrix$getRow, y, m));
+		var centerNbrs = A2(Kraxorax$elm_matrix_a$Neighbours$boundHorizontalCenter, x, rowCenter);
+		return A2(elm$core$Array$append, sideNbrs, centerNbrs);
+	});
+var Kraxorax$elm_matrix_a$Neighbours$neighbours = function (mt) {
 	switch (mt.$) {
 		case 'Plane':
-			return author$project$Matrix$Neighbours$neighboursOnPlane;
+			return Kraxorax$elm_matrix_a$Neighbours$neighboursOnPlane;
 		case 'Torus':
-			return author$project$Matrix$Neighbours$neighboursOnTorus;
+			return Kraxorax$elm_matrix_a$Neighbours$neighboursOnTorus;
 		case 'StripVertical':
-			return author$project$Matrix$Neighbours$neighboursOnVerticalStrip;
+			return Kraxorax$elm_matrix_a$Neighbours$neighboursOnVerticalStrip;
 		default:
-			return author$project$Matrix$Neighbours$neighboursOnHorizontalStrip;
+			return Kraxorax$elm_matrix_a$Neighbours$neighboursOnHorizontalStrip;
+	}
+};
+var author$project$GejmOfLajf$isZiva = function (c) {
+	if (c.$ === 'Ziva') {
+		return true;
+	} else {
+		return false;
 	}
 };
 var elm$core$List$filter = F2(
@@ -7262,7 +7607,8 @@ var author$project$GejmOfLajf$numbOfZive = F3(
 			A2(
 				elm$core$List$filter,
 				author$project$GejmOfLajf$isZiva,
-				A4(author$project$Matrix$Neighbours$neighbours, m.topology, x, y, m.matrica)));
+				elm$core$Array$toList(
+					A4(Kraxorax$elm_matrix_a$Neighbours$neighbours, m.topology, x, y, m.matrica))));
 	});
 var author$project$GejmOfLajf$survival = F2(
 	function (komsije, celija) {
@@ -7270,7 +7616,7 @@ var author$project$GejmOfLajf$survival = F2(
 	});
 var author$project$GejmOfLajf$novoStanje = function (m) {
 	return A2(
-		author$project$Matrix$indexedMap,
+		Kraxorax$elm_matrix_a$Matrix$indexedMap,
 		F3(
 			function (x, y, c) {
 				var komsije = A3(author$project$GejmOfLajf$numbOfZive, x, y, m);
@@ -7298,101 +7644,134 @@ var author$project$GejmOfLajf$tick = F2(
 var author$project$GejmOfLajf$Recreate = function (a) {
 	return {$: 'Recreate', a: a};
 };
-var author$project$Matrix$concatHorizontal = F2(
-	function (m, n) {
+var Kraxorax$elm_matrix_a$Matrix$concatHorizontal = F2(
+	function (_n0, m2) {
+		var w1 = _n0.a;
+		var m = _n0.b;
+		var w2 = m2.a;
+		var n = m2.b;
 		return _Utils_eq(
-			author$project$Matrix$height(m),
-			author$project$Matrix$height(n)) ? elm$core$Maybe$Just(
+			elm$core$Array$length(m),
+			elm$core$Array$length(n)) ? elm$core$Result$Ok(
 			A2(
-				elm$core$List$indexedMap,
-				F2(
-					function (i, mrow) {
-						return A2(
-							elm$core$List$append,
-							mrow,
-							A2(
-								elm$core$Maybe$withDefault,
-								_List_Nil,
-								A2(author$project$Matrix$getRow, i, n)));
-					}),
-				m)) : elm$core$Maybe$Nothing;
+				Kraxorax$elm_matrix_a$Matrix$Matrix,
+				w1 + w2,
+				A2(
+					elm$core$Array$indexedMap,
+					F2(
+						function (i, mrow) {
+							return A2(
+								elm$core$Array$append,
+								mrow,
+								A2(
+									elm$core$Result$withDefault,
+									elm$core$Array$empty,
+									A2(Kraxorax$elm_matrix_a$Matrix$getRow, i, m2)));
+						}),
+					m))) : elm$core$Result$Err('Matrix: matrices are of different height');
 	});
-var author$project$Matrix$concatVertical = F2(
-	function (m, n) {
-		return _Utils_eq(
-			author$project$Matrix$width(m),
-			author$project$Matrix$width(n)) ? elm$core$Maybe$Just(
-			A2(elm$core$List$append, m, n)) : elm$core$Maybe$Nothing;
+var Kraxorax$elm_matrix_a$Matrix$concatVertical = F2(
+	function (_n0, _n1) {
+		var w1 = _n0.a;
+		var m = _n0.b;
+		var w2 = _n1.a;
+		var n = _n1.b;
+		return _Utils_eq(w1, w2) ? elm$core$Result$Ok(
+			A2(
+				Kraxorax$elm_matrix_a$Matrix$Matrix,
+				w1,
+				A2(elm$core$Array$append, m, n))) : elm$core$Result$Err('Matrix: matrices are of different width');
 	});
+var Kraxorax$elm_matrix_a$Matrix$width = function (_n0) {
+	var w = _n0.a;
+	return w;
+};
 var author$project$GejmOfLajf$enlarge = F2(
 	function (t, d) {
 		var hsides = A3(
-			author$project$Matrix$repeat,
+			Kraxorax$elm_matrix_a$Matrix$repeat,
 			d,
-			author$project$Matrix$height(t),
+			Kraxorax$elm_matrix_a$Matrix$height(t),
 			author$project$GejmOfLajf$Mrtva);
 		var nt = A2(
-			elm$core$Maybe$withDefault,
+			elm$core$Result$withDefault,
 			t,
-			A2(author$project$Matrix$concatHorizontal, hsides, t));
+			A2(Kraxorax$elm_matrix_a$Matrix$concatHorizontal, hsides, t));
 		var nt1 = A2(
-			elm$core$Maybe$withDefault,
+			elm$core$Result$withDefault,
 			t,
-			A2(author$project$Matrix$concatHorizontal, nt, hsides));
+			A2(Kraxorax$elm_matrix_a$Matrix$concatHorizontal, nt, hsides));
 		var vsides = A3(
-			author$project$Matrix$repeat,
-			author$project$Matrix$width(nt1),
+			Kraxorax$elm_matrix_a$Matrix$repeat,
+			Kraxorax$elm_matrix_a$Matrix$width(nt1),
 			d,
 			author$project$GejmOfLajf$Mrtva);
 		var nt2 = A2(
-			elm$core$Maybe$withDefault,
+			elm$core$Result$withDefault,
 			t,
-			A2(author$project$Matrix$concatVertical, vsides, nt1));
+			A2(Kraxorax$elm_matrix_a$Matrix$concatVertical, vsides, nt1));
 		var nt3 = A2(
-			elm$core$Maybe$withDefault,
+			elm$core$Result$withDefault,
 			nt2,
-			A2(author$project$Matrix$concatVertical, nt2, vsides));
+			A2(Kraxorax$elm_matrix_a$Matrix$concatVertical, nt2, vsides));
 		return nt3;
 	});
-var author$project$GejmOfLajf$trimList = F2(
-	function (d, l) {
+var Kraxorax$elm_matrix_a$Matrix$generate = F3(
+	function (w, h, f) {
 		return A2(
-			elm$core$List$take,
-			elm$core$List$length(l) - (2 * d),
-			A2(elm$core$List$drop, d, l));
+			Kraxorax$elm_matrix_a$Matrix$Matrix,
+			w,
+			A2(
+				elm$core$Array$initialize,
+				h,
+				function (y) {
+					return A2(
+						elm$core$Array$initialize,
+						w,
+						function (x) {
+							return A2(f, x, y);
+						});
+				}));
+	});
+var Kraxorax$elm_matrix_a$Matrix$get = F3(
+	function (x, y, _n0) {
+		var m = _n0.b;
+		var _n1 = A3(
+			elm$core$Basics$composeR,
+			elm$core$Array$get(y),
+			A2(
+				elm$core$Basics$composeR,
+				elm$core$Maybe$withDefault(elm$core$Array$empty),
+				elm$core$Array$get(x)),
+			m);
+		if (_n1.$ === 'Nothing') {
+			return elm$core$Result$Err('Matrix: Location out of bounds');
+		} else {
+			var a = _n1.a;
+			return elm$core$Result$Ok(a);
+		}
 	});
 var elm$core$Basics$abs = function (n) {
 	return (n < 0) ? (-n) : n;
 };
-var elm$core$Maybe$map = F2(
-	function (f, maybe) {
-		if (maybe.$ === 'Just') {
-			var value = maybe.a;
-			return elm$core$Maybe$Just(
-				f(value));
-		} else {
-			return elm$core$Maybe$Nothing;
-		}
-	});
 var author$project$GejmOfLajf$ensmallen = F2(
 	function (t, delta) {
-		var ts = author$project$Matrix$width(t);
+		var ts = Kraxorax$elm_matrix_a$Matrix$width(t);
 		var d = elm$core$Basics$abs(delta);
 		var r = ts - (2 * d);
 		var rng = A2(elm$core$List$range, 0, r);
-		var l = A2(
-			elm$core$List$map,
-			function (p) {
-				return A2(
-					elm$core$Maybe$withDefault,
-					_List_Nil,
-					A2(
-						elm$core$Maybe$map,
-						author$project$GejmOfLajf$trimList(d),
-						A2(author$project$Matrix$getRow, p + d, t)));
-			},
-			rng);
-		return l;
+		var sm = A3(
+			Kraxorax$elm_matrix_a$Matrix$generate,
+			r,
+			r,
+			F2(
+				function (x, y) {
+					return A2(
+						elm$core$Result$withDefault,
+						author$project$GejmOfLajf$Mrtva,
+						A3(Kraxorax$elm_matrix_a$Matrix$get, x + d, y + d, t));
+				}));
+		return sm;
 	});
 var author$project$GejmOfLajf$resize = F2(
 	function (t, d) {
@@ -7469,7 +7848,7 @@ var author$project$GejmOfLajf$update = F2(
 						model,
 						{
 							matrica: A2(
-								author$project$Matrix$indexedMap,
+								Kraxorax$elm_matrix_a$Matrix$indexedMap,
 								F3(
 									function (cx, cy, c) {
 										return (_Utils_eq(cx, x) && _Utils_eq(cy, y)) ? author$project$GejmOfLajf$toggleCell(c) : c;
@@ -7482,7 +7861,7 @@ var author$project$GejmOfLajf$update = F2(
 					_Utils_update(
 						model,
 						{
-							matrica: A3(author$project$Matrix$repeat, model.boardSize, model.boardSize, author$project$GejmOfLajf$Mrtva)
+							matrica: A3(Kraxorax$elm_matrix_a$Matrix$repeat, model.boardSize, model.boardSize, author$project$GejmOfLajf$Mrtva)
 						}),
 					elm$core$Platform$Cmd$none);
 			case 'Step':
@@ -7520,6 +7899,15 @@ var author$project$Klok$update = F2(
 		}
 	});
 var elm$core$Debug$log = _Debug_log;
+var elm$core$List$head = function (list) {
+	if (list.b) {
+		var x = list.a;
+		var xs = list.b;
+		return elm$core$Maybe$Just(x);
+	} else {
+		return elm$core$Maybe$Nothing;
+	}
+};
 var author$project$Klokotalo$update = F2(
 	function (msg, model) {
 		switch (msg.$) {
@@ -8185,6 +8573,13 @@ var author$project$Forma$view = function (model) {
 				dugme
 			]));
 };
+var Kraxorax$elm_matrix_a$Matrix$toArray = function (_n0) {
+	var m = _n0.b;
+	return A3(elm$core$Array$foldr, elm$core$Array$append, elm$core$Array$empty, m);
+};
+var Kraxorax$elm_matrix_a$Neighbours$Plane = {$: 'Plane'};
+var Kraxorax$elm_matrix_a$Neighbours$StripHorizontal = {$: 'StripHorizontal'};
+var Kraxorax$elm_matrix_a$Neighbours$StripVertical = {$: 'StripVertical'};
 var author$project$GejmOfLajf$Accelerate = function (a) {
 	return {$: 'Accelerate', a: a};
 };
@@ -8319,10 +8714,6 @@ var author$project$GejmOfLajf$topologyToString = function (mt) {
 			return 'Vertical Strip';
 	}
 };
-var author$project$Matrix$toList = elm$core$List$concat;
-var author$project$Matrix$Neighbours$Plane = {$: 'Plane'};
-var author$project$Matrix$Neighbours$StripHorizontal = {$: 'StripHorizontal'};
-var author$project$Matrix$Neighbours$StripVertical = {$: 'StripVertical'};
 var elm$html$Html$table = _VirtualDom_node('table');
 var elm$html$Html$td = _VirtualDom_node('td');
 var elm$html$Html$tr = _VirtualDom_node('tr');
@@ -8341,11 +8732,12 @@ var author$project$GejmOfLajf$view = function (model) {
 				A2(
 				elm$html$Html$div,
 				boardStyle,
-				author$project$Matrix$toList(
-					A2(
-						author$project$Matrix$indexedMap,
-						author$project$GejmOfLajf$matrixToBoard(model.boardSize),
-						model.matrica))),
+				elm$core$Array$toList(
+					Kraxorax$elm_matrix_a$Matrix$toArray(
+						A2(
+							Kraxorax$elm_matrix_a$Matrix$indexedMap,
+							author$project$GejmOfLajf$matrixToBoard(model.boardSize),
+							model.matrica)))),
 				A2(
 				elm$html$Html$table,
 				_List_Nil,
@@ -8450,7 +8842,7 @@ var author$project$GejmOfLajf$view = function (model) {
 										_List_fromArray(
 											[
 												elm$html$Html$Events$onClick(
-												author$project$GejmOfLajf$ChangeTopology(author$project$Matrix$Neighbours$Torus))
+												author$project$GejmOfLajf$ChangeTopology(Kraxorax$elm_matrix_a$Neighbours$Torus))
 											]),
 										_List_fromArray(
 											[
@@ -8467,7 +8859,7 @@ var author$project$GejmOfLajf$view = function (model) {
 										_List_fromArray(
 											[
 												elm$html$Html$Events$onClick(
-												author$project$GejmOfLajf$ChangeTopology(author$project$Matrix$Neighbours$Plane))
+												author$project$GejmOfLajf$ChangeTopology(Kraxorax$elm_matrix_a$Neighbours$Plane))
 											]),
 										_List_fromArray(
 											[
@@ -8551,7 +8943,7 @@ var author$project$GejmOfLajf$view = function (model) {
 										_List_fromArray(
 											[
 												elm$html$Html$Events$onClick(
-												author$project$GejmOfLajf$ChangeTopology(author$project$Matrix$Neighbours$StripVertical))
+												author$project$GejmOfLajf$ChangeTopology(Kraxorax$elm_matrix_a$Neighbours$StripVertical))
 											]),
 										_List_fromArray(
 											[
@@ -8568,7 +8960,7 @@ var author$project$GejmOfLajf$view = function (model) {
 										_List_fromArray(
 											[
 												elm$html$Html$Events$onClick(
-												author$project$GejmOfLajf$ChangeTopology(author$project$Matrix$Neighbours$StripHorizontal))
+												author$project$GejmOfLajf$ChangeTopology(Kraxorax$elm_matrix_a$Neighbours$StripHorizontal))
 											]),
 										_List_fromArray(
 											[

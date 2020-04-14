@@ -1,15 +1,12 @@
-module GejmOfLajf exposing (Celija(..), Model, Msg(..), Tabla, boardPxWH, celToEle, celToString, cellSize, defaultBoardSize, defaultRefreshTime, enlarge, flyer, init, isZiva, istocifra, matrixToBoard, modulo, novoStanje, numbOfZive, ozivi, randomBrojevi,  step, survival, tick, toggleCell, topologyToString, trimList, update, view)
+module GejmOfLajf exposing (Celija(..), Model, Msg(..), Tabla, boardPxWH, celToEle, celToString, cellSize, defaultBoardSize, defaultRefreshTime, enlarge, flyer, init, isZiva, istocifra, matrixToBoard, modulo, novoStanje, numbOfZive, ozivi, randomBrojevi, step, survival, tick, toggleCell, topologyToString, trimList, update, view)
 
-import Debug
 import Array
 import Html exposing (..)
 import Html.Attributes exposing (class, style)
 import Html.Events exposing (onClick)
-import Matrix exposing (..)
-import Neighbours exposing (..)
+import Matrix exposing (Matrix, concatHorizontal, concatVertical, generate, indexedMap, repeat)
+import Neighbours exposing (MatrixTopology(..), neighbours)
 import Random exposing (Generator, generate, int, list, pair)
-import Time exposing (Posix)
-import Tuple
 
 
 defaultBoardSize : Int
@@ -57,7 +54,7 @@ type alias Model =
     , genNumb : Int
     , running : Bool
     , refreshTime : Float
-    , topology : Neighbours.MatrixTopology
+    , topology : MatrixTopology
     }
 
 
@@ -74,8 +71,7 @@ flyer =
 init : List ( Int, Int ) -> Model
 init zivi =
     Model
-        -- (ozivi zivi defaultBoardSize)
-        (ozivi flyer defaultBoardSize)
+        (ozivi zivi defaultBoardSize)
         defaultBoardSize
         0
         0
@@ -89,7 +85,7 @@ ozivi : List ( Int, Int ) -> Int -> Matrix Celija
 ozivi zivi boardSize =
     repeat boardSize boardSize Mrtva
         |> indexedMap
-            (\x y c ->
+            (\x y _ ->
                 if List.member ( x, y ) zivi then
                     Ziva
 
@@ -150,18 +146,11 @@ ensmallen t delta =
         r =
             ts - 2 * d
 
-        rng =
-            List.range 0 r
-
         sm =
-            Matrix.generate r r (\x y -> (Matrix.get (x + d) (y + d) t) |> Result.withDefault Mrtva)
-
+            Matrix.generate r r (\x y -> Matrix.get (x + d) (y + d) t |> Result.withDefault Mrtva)
     in
     sm
 
-trimArray : Int -> Array.Array a -> Array.Array a
-trimArray d a =
-    Array.toList a |> trimList d |> Array.fromList
 
 trimList : Int -> List a -> List a
 trimList d l =
@@ -313,7 +302,7 @@ update msg model =
             , Cmd.none
             )
 
-        Klik ( x, y ) cl ->
+        Klik ( x, y ) _ ->
             ( { model
                 | matrica =
                     indexedMap
@@ -460,7 +449,8 @@ view model =
             (indexedMap
                 (matrixToBoard model.boardSize)
                 model.matrica
-                |> Matrix.toArray |> Array.toList
+                |> Matrix.toArray
+                |> Array.toList
             )
         , table []
             [ tr []

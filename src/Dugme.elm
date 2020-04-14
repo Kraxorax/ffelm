@@ -1,7 +1,7 @@
-module Dugme exposing (..)
+module Dugme exposing (view, update, init, Dugme, Msg(..))
 
 import Color exposing (Color, toCssString)
-import Html exposing (..)
+import Html
 import Html.Attributes exposing (style)
 import Html.Events exposing (onMouseEnter, onMouseLeave, onClick)
 
@@ -49,15 +49,15 @@ toggleBoja b =
             Prva
 
 
-view : Dugme -> Html Msg
+view : Dugme -> Html.Html Msg
 view dugme =
-    button
+    Html.button
         [ style  "background-color" (stringboje dugme)
         , onMouseEnter PromeniDugme
         , onMouseLeave PromeniDugme
         , onClick Klick
         ]
-        [ text dugme.text ]
+        [ Html.text dugme.text ]
 
 
 bojaDugmeta : Dugme -> Color

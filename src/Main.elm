@@ -1,77 +1,69 @@
 module Main exposing (main)
 
+import Browser
+import Browser.Events exposing (onAnimationFrameDelta)
+import Browser.Navigation exposing (load, pushUrl)
+import Color
+import Dugme exposing (Dugme)
+import Forma
+import GejmOfLajf
 import Html exposing (Html)
 import Html.Attributes exposing (href)
-import Browser
-import Browser.Navigation exposing (pushUrl, load)
-import Browser.Events exposing (onAnimationFrameDelta)
-import Url
-import Animation
-import Time exposing (Posix, posixToMillis, millisToPosix )
-import Random exposing (pair, list, int, generate, Generator)
-import Color
-import Debug exposing (log)
-
-import Forma
 import Klok
 import Klokotalo
-import Dugme exposing (Dugme)
 import Model exposing (Model)
+import Random exposing (generate)
 import Routing exposing (Route(..))
-import GejmOfLajf
+import Url
+
 
 main : Program () Model Msg
 main =
-    Browser.application 
+    Browser.application
         { init = init
         , view = view
         , update = update
         , subscriptions = subscriptions
-        , onUrlChange = (\url -> UrlUpdate url)
-        , onUrlRequest = (\urlReq -> RequestedUrl urlReq)
+        , onUrlChange = \url -> UrlUpdate url
+        , onUrlRequest = \urlReq -> RequestedUrl urlReq
         }
 
 
 init : () -> Url.Url -> Browser.Navigation.Key -> ( Model, Cmd Msg )
-init flags location key =
+init _ location key =
     let
         route =
             Routing.routeLocation location
     in
-        ( { 
-            navKey = key
-            ,dugmici =
-                [ Dugme.init Color.darkGray Color.orange "Kara"
-                , Dugme.init Color.green Color.red "Klasik"
-                ]
-          , naziv = Nothing
-          , formica = Forma.init 0
-          , klok = Klok.init 0 0
-          , klokotalo = Klokotalo.init
-          , route = route
-          , clock = 0
-          , counter = 0
-          , gol =
-                GejmOfLajf.init
-                    []
-          }
-        , generate RandomGen (GejmOfLajf.randomBrojevi GejmOfLajf.defaultBoardSize)
-        )
+    ( { navKey = key
+      , dugmici =
+            [ Dugme.init Color.darkGray Color.orange "Kara"
+            , Dugme.init Color.green Color.red "Klasik"
+            ]
+      , naziv = Nothing
+      , formica = Forma.init 0
+      , klok = Klok.init 0 0
+      , klokotalo = Klokotalo.init
+      , route = route
+      , clock = 0
+      , counter = 0
+      , gol =
+            GejmOfLajf.init
+                []
+      }
+    , generate RandomGen (GejmOfLajf.randomBrojevi GejmOfLajf.defaultBoardSize)
+    )
 
 
 type Msg
-    = AMsg
-    | Dugmici Int Dugme.Msg
+    = Dugmici Int Dugme.Msg
     | NasaForma Forma.Msg
-    | Klok Klok.Msg
     | Klokotalo Klokotalo.Msg
     | UrlUpdate Url.Url
     | RequestedUrl Browser.UrlRequest
     | Gol GejmOfLajf.Msg
     | Animate Float
     | RandomGen (List ( Int, Int ))
-
-
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -82,14 +74,16 @@ update msg model =
                 route =
                     Routing.routeLocation location
             in
-                ({ model | route = route } , Cmd.none)
+            ( { model | route = route }, Cmd.none )
+
         RequestedUrl urlReq ->
             case urlReq of
-                Browser.Internal url -> ( model, pushUrl model.navKey (Url.toString url) )
-                Browser.External href -> ( model, load href )
-        
-        AMsg ->
-            (model , Cmd.none)
+                Browser.Internal url ->
+                    ( model, pushUrl model.navKey (Url.toString url) )
+
+                Browser.External href ->
+                    ( model, load href )
+
         Dugmici i dmsg ->
             let
                 ( ndugmici, maybstr ) =
@@ -106,7 +100,8 @@ update msg model =
                                                 nd =
                                                     Dugme.update dmsg dug
                                             in
-                                                ( nd, model.naziv )
+                                            ( nd, model.naziv )
+
                                 else
                                     ( dug, Nothing )
                             )
@@ -117,7 +112,7 @@ update msg model =
                         |> List.filterMap identity
                         |> List.head
             in
-                ({ model | dugmici = ndugmici, naziv = noviNaziv } , Cmd.none)
+            ( { model | dugmici = ndugmici, naziv = noviNaziv }, Cmd.none )
 
         NasaForma fmsg ->
             let
@@ -131,95 +126,106 @@ update msg model =
                                 nd =
                                     Dugme.init p d t
                             in
-                                nd :: model.dugmici
+                            nd :: model.dugmici
 
                         _ ->
                             model.dugmici
             in
-                ({ model | formica = nf, dugmici = dugmici } ,  Cmd.map NasaForma cmd )
-
-        Klok kmsg ->
-            ({ model | klok = Klok.update kmsg model.klok } , Cmd.none)
+            ( { model | formica = nf, dugmici = dugmici }, Cmd.map NasaForma cmd )
 
         Klokotalo kt ->
-            ({ model | klokotalo = Klokotalo.update kt model.klokotalo } , Cmd.none)
+            ( { model | klokotalo = Klokotalo.update kt model.klokotalo }, Cmd.none )
 
         Animate diff ->
-            ({ model
+            ( { model
                 | clock = model.clock
                 , gol = GejmOfLajf.tick diff model.gol
-            }
-                , Cmd.none)
+              }
+            , Cmd.none
+            )
+
         Gol golMsg ->
             let
-                modCmd = GejmOfLajf.update golMsg model.gol 
+                modCmd =
+                    GejmOfLajf.update golMsg model.gol
             in
-                ({ model
-                    | gol = Tuple.first modCmd
-                } , Cmd.map (\gm -> Gol gm) (Tuple.second modCmd))
+            ( { model
+                | gol = Tuple.first modCmd
+              }
+            , Cmd.map (\gm -> Gol gm) (Tuple.second modCmd)
+            )
 
         RandomGen zivi ->
-            ({ model
+            ( { model
                 | gol = GejmOfLajf.init zivi
-            } , Cmd.none)
+              }
+            , Cmd.none
+            )
+
 
 subscriptions : Model -> Sub Msg
-subscriptions model =
+subscriptions _ =
     Sub.batch [ Browser.Events.onAnimationFrameDelta Animate ]
+
 
 pageByRoute : Model -> Html Msg
 pageByRoute model =
     case model.route of
         Prva ->
             let
-                naziv = case model.naziv of
-                    Just t ->
-                        Html.h1 [] [ Html.text t ]
+                naziv =
+                    case model.naziv of
+                        Just t ->
+                            Html.h1 [] [ Html.text t ]
 
-                    Nothing ->
-                        Html.div [] []
+                        Nothing ->
+                            Html.div [] []
 
                 levo =
-                    naziv :: (dugmad model.dugmici)
+                    naziv :: dugmad model.dugmici
 
                 desno =
                     Forma.view model.formica
                         |> Html.map NasaForma
             in
-                Html.div [] (levo ++ [ desno ])
+            Html.div [] (levo ++ [ desno ])
 
-        Druga -> 
-            Html.div [] [ Html.h1 [] [ Html.text <| "druga" ]
-            -- , Klok.view model.klok |> Html.map Klok
-            , Klokotalo.view model.klokotalo |> Html.map Klokotalo
-            ]
-      
+        Druga ->
+            Html.div []
+                [ Html.h1 [] [ Html.text <| "druga" ]
+                , Klokotalo.view model.klokotalo |> Html.map Klokotalo
+                ]
+
         GOL ->
-             Html.map (\golMsg -> Gol golMsg) (GejmOfLajf.view model.gol)
+            Html.map (\golMsg -> Gol golMsg) (GejmOfLajf.view model.gol)
+
 
 view : Model -> Browser.Document Msg
 view model =
     let
-        stabre = pageByRoute model
+        stabre =
+            pageByRoute model
     in
-        Browser.Document
-            "AAAA"
-            ([Html.div []
-                [ navView
-                , Html.h6 [] [ Html.text (model.clock |> String.fromFloat) ]
-                , Html.div [] [stabre]
-                ]])
+    Browser.Document
+        "AAAA"
+        [ Html.div []
+            [ navView
+            , Html.h6 [] [ Html.text (model.clock |> String.fromFloat) ]
+            , Html.div [] [ stabre ]
+            ]
+        ]
+
 
 navView : Html Msg
 navView =
-    Html.ul [] 
-    [   Html.li []
-            [ Html.a [ Html.Attributes.href "/prva"] [ Html.text "prva"]]
-    ,   Html.li []    
-            [ Html.a [ Html.Attributes.href "/druga"] [ Html.text "druga"]]
-    ,   Html.li []    
-            [ Html.a [ Html.Attributes.href "/gol"] [ Html.text "game of life"]]
-    ]
+    Html.ul []
+        [ Html.li []
+            [ Html.a [ Html.Attributes.href "/prva" ] [ Html.text "prva" ] ]
+        , Html.li []
+            [ Html.a [ Html.Attributes.href "/druga" ] [ Html.text "druga" ] ]
+        , Html.li []
+            [ Html.a [ Html.Attributes.href "/gol" ] [ Html.text "game of life" ] ]
+        ]
 
 
 dugmad : List Dugme -> List (Html Msg)

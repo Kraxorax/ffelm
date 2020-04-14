@@ -1,8 +1,5 @@
-module Util exposing (..)
+module Util exposing (makeId)
 
-
-
-type alias CompId = { id: String }
 
 makeId: String -> Int -> String
 makeId s i = s ++ "_" ++ String.fromInt i

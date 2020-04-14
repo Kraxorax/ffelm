@@ -1,16 +1,14 @@
-module Routing exposing (..)
+module Routing exposing (routeFromUrlRequest, Route(..), routeLocation)
 
 
 import Url
-import Url.Parser exposing (Parser, parse, int, map, oneOf, s, top)
-import Url.Builder exposing (absolute)
+import Url.Parser exposing (Parser, parse, map, oneOf, s)
 import Browser
 
 type Route
     = Prva
     | Druga
     | GOL
-    -- | NotFoundRoute
 
 routeFromUrlRequest : Browser.UrlRequest -> Route
 routeFromUrlRequest ur = 
@@ -19,7 +17,7 @@ routeFromUrlRequest ur =
         Browser.External href -> stringToRoute href
 
 stringToRoute : String -> Route
-stringToRoute s = Prva
+stringToRoute _ = GOL
 
 routeLocation : Url.Url -> Route
 routeLocation =
@@ -33,7 +31,7 @@ parseRoute =
 
 routeFromResult : Maybe Route -> Route
 routeFromResult =
-    Maybe.withDefault Druga
+    Maybe.withDefault GOL
 
 
 route : Parser (Route -> a) a

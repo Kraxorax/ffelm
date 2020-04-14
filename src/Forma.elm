@@ -1,11 +1,11 @@
-module Forma exposing (..)
+module Forma exposing (view, update, Model, Msg(..), init)
 
 import Dugme
-import Color exposing (Color, toCssString)
-import ColorPicker exposing (hex2Color)
-import Html exposing (..)
+import Color exposing (Color)
+import Hex
 import Html.Attributes exposing (value)
 import Html.Events exposing (onInput, onSubmit)
+import Html
 
 
 submitDugme : Dugme.Dugme
@@ -38,7 +38,7 @@ type alias BojaForma =
 
 
 init : Int -> Model
-init a =
+init _ =
     { sdugme = submitDugme
     , prvu = ""
     , drugu = ""
@@ -57,16 +57,16 @@ update msg model =
                 , Cmd.none)
 
         SetPrva s ->
-            ((parseForm { model | prvu = s }) , Cmd.none)
+            (parseForm { model | prvu = s } , Cmd.none)
 
         SetDruga s ->
-            ((parseForm { model | drugu = s }) , Cmd.none)
+            (parseForm { model | drugu = s } , Cmd.none)
 
         SetTitle s ->
-            ((parseForm { model | title = s }) , Cmd.none)
+            (parseForm { model | title = s } , Cmd.none)
 
         Submit _ ->
-            ((init 0) , Cmd.none)
+            (init 0 , Cmd.none)
 
 
 parseForm : Model -> Model
@@ -80,8 +80,21 @@ parseForm model =
     in
         { model | parsd = parsd }
 
+hex2Color : String -> Maybe Color
+hex2Color hex =
+    let
+        r = String.slice 0 1 hex
+        g = String.slice 2 3 hex
+        b = String.slice 4 5 hex
 
-view : Model -> Html Msg
+        red  = Hex.fromString r |> Result.withDefault 0 |> toFloat
+        green  = Hex.fromString g |> Result.withDefault 0 |> toFloat
+        blue = Hex.fromString b |> Result.withDefault 0 |> toFloat
+    in
+        Just (Color.rgb red green blue)
+
+
+view : Model -> Html.Html Msg
 view model =
     let
         dugme =
@@ -89,18 +102,18 @@ view model =
 
         frm = model.parsd
     in
-        form [ onSubmit (Submit frm) ]
-            [ label []
-                [ text "Prva"
-                , input [ onInput SetPrva, value model.prvu ] []
+        Html.form [ onSubmit (Submit frm) ]
+            [ Html.label []
+                [ Html.text "Prva"
+                , Html.input [ onInput SetPrva, value model.prvu ] []
                 ]
-            , label []
-                [ text "Druga"
-                , input [ onInput SetDruga, value model.drugu ] []
+            , Html.label []
+                [ Html.text "Druga"
+                , Html.input [ onInput SetDruga, value model.drugu ] []
                 ]
-            , label []
-                [ text "Title"
-                , input [ onInput SetTitle, value model.title ] []
+            , Html.label []
+                [ Html.text "Title"
+                , Html.input [ onInput SetTitle, value model.title ] []
                 ]
             , dugme
             ]

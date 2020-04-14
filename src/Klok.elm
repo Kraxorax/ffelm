@@ -1,39 +1,41 @@
-module Klok exposing (..)
+module Klok exposing (Klok, Msg(..), init, update, view)
 
-import Html exposing (..)
-import Html.Events exposing (on, onInput, onClick)
-
-import Util exposing (..)
-
+import Html
+import Html.Events exposing (onClick)
+import Util exposing (makeId)
 
 
-type alias Klok = 
-  { id: String
-  , i: Int
-  }
+type alias Klok =
+    { id : String
+    , i : Int
+    }
 
 
 type Msg
-  = Dole String
-  | Gore String
+    = Dole String
+    | Gore String
 
 
-init: Int -> Int -> Klok
-init i index = Klok (makeId "klok" index) i
+init : Int -> Int -> Klok
+init i index =
+    Klok (makeId "klok" index) i
 
 
-update: Msg -> Klok -> Klok
+update : Msg -> Klok -> Klok
 update msg m =
-  case msg of
-    Dole s -> { m | i = m.i - 1}
-    Gore s -> { m | i = m.i + 1}
+    case msg of
+        Dole _ ->
+            { m | i = m.i - 1 }
+
+        Gore _ ->
+            { m | i = m.i + 1 }
 
 
-view: Klok -> Html Msg
+view : Klok -> Html.Html Msg
 view m =
-  div []
-    [ button [ onClick ( Dole m.id ) ] [ text "-" ]
-    , text (String.fromInt m.i)
-    , button [ onClick ( Gore m.id ) ] [ text "+" ]
-    , text (" - " ++ m.id)
-    ]
+    Html.div []
+        [ Html.button [ onClick (Dole m.id) ] [ Html.text "-" ]
+        , Html.text (String.fromInt m.i)
+        , Html.button [ onClick (Gore m.id) ] [ Html.text "+" ]
+        , Html.text (" - " ++ m.id)
+        ]
