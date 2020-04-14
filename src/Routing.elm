@@ -6,9 +6,10 @@ import Url.Parser exposing (Parser, parse, map, oneOf, s)
 import Browser
 
 type Route
-    = Prva
-    | Druga
+    = Forma
+    | Klokotala
     | GOL
+    | Randomer
 
 routeFromUrlRequest : Browser.UrlRequest -> Route
 routeFromUrlRequest ur = 
@@ -31,13 +32,14 @@ parseRoute =
 
 routeFromResult : Maybe Route -> Route
 routeFromResult =
-    Maybe.withDefault GOL
+    Maybe.withDefault Randomer
 
 
 route : Parser (Route -> a) a
 route =
     oneOf
         [ map GOL (s "gol")
-        , map Prva (s "prva")
-        , map Druga (s "druga")
+        , map Randomer (s "randomer")
+        , map Forma (s "forma")
+        , map Klokotala (s "klokotala")
         ]

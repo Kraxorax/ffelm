@@ -4,17 +4,18 @@ import Browser
 import Browser.Events exposing (onAnimationFrameDelta)
 import Browser.Navigation exposing (load, pushUrl)
 import Color
-import Dugme exposing (Dugme)
-import Forma
-import GejmOfLajf
 import Html exposing (Html)
 import Html.Attributes exposing (href)
-import Klok
-import Klokotalo
 import Model exposing (Model)
 import Random exposing (generate)
 import Routing exposing (Route(..))
 import Url
+import Pages.Forma.Dugme as Dugme exposing (Dugme)
+import Pages.Forma.Forma as Forma
+import Pages.GejmOfLajf as GejmOfLajf
+import Pages.Randomer as Randomer
+import Pages.Klokotalo.Klok as Klok
+import Pages.Klokotalo.Klokotalo as Klokotalo
 
 
 main : Program () Model Msg
@@ -24,8 +25,8 @@ main =
         , view = view
         , update = update
         , subscriptions = subscriptions
-        , onUrlChange = \url -> UrlUpdate url
-        , onUrlRequest = \urlReq -> RequestedUrl urlReq
+        , onUrlChange = UrlUpdate -- \url -> UrlUpdate url
+        , onUrlRequest = RequestedUrl --\urlReq -> RequestedUrl urlReq
         }
 
 
@@ -50,6 +51,8 @@ init _ location key =
       , gol =
             GejmOfLajf.init
                 []
+
+        , randomer = Randomer.init
       }
     , generate RandomGen (GejmOfLajf.randomBrojevi GejmOfLajf.defaultBoardSize)
     )
@@ -62,6 +65,7 @@ type Msg
     | UrlUpdate Url.Url
     | RequestedUrl Browser.UrlRequest
     | Gol GejmOfLajf.Msg
+    | Rndmr Randomer.Msg
     | Animate Float
     | RandomGen (List ( Int, Int ))
 
@@ -162,6 +166,11 @@ update msg model =
             , Cmd.none
             )
 
+        Rndmr rndMsg ->
+            
+            ( { model
+                | randomer = Randomer.update rndMsg model.randomer }, Cmd.none)
+
 
 subscriptions : Model -> Sub Msg
 subscriptions _ =
@@ -171,7 +180,7 @@ subscriptions _ =
 pageByRoute : Model -> Html Msg
 pageByRoute model =
     case model.route of
-        Prva ->
+        Forma ->
             let
                 naziv =
                     case model.naziv of
@@ -190,14 +199,17 @@ pageByRoute model =
             in
             Html.div [] (levo ++ [ desno ])
 
-        Druga ->
+        Klokotala ->
             Html.div []
-                [ Html.h1 [] [ Html.text <| "druga" ]
+                [ Html.h1 [] [ Html.text <| "klokotala" ]
                 , Klokotalo.view model.klokotalo |> Html.map Klokotalo
                 ]
 
         GOL ->
             Html.map (\golMsg -> Gol golMsg) (GejmOfLajf.view model.gol)
+
+        Randomer ->
+            Html.map (\rndmrMsg -> Rndmr rndmrMsg) (Randomer.view model.randomer)
 
 
 view : Model -> Browser.Document Msg
@@ -220,11 +232,13 @@ navView : Html Msg
 navView =
     Html.ul []
         [ Html.li []
-            [ Html.a [ Html.Attributes.href "/prva" ] [ Html.text "prva" ] ]
+            [ Html.a [ Html.Attributes.href "/forma" ] [ Html.text "forma" ] ]
         , Html.li []
-            [ Html.a [ Html.Attributes.href "/druga" ] [ Html.text "druga" ] ]
+            [ Html.a [ Html.Attributes.href "/klokotala" ] [ Html.text "klokotala" ] ]
         , Html.li []
             [ Html.a [ Html.Attributes.href "/gol" ] [ Html.text "game of life" ] ]
+        , Html.li []
+            [ Html.a [ Html.Attributes.href "/randomer" ] [ Html.text "the randomer generative creator supreme" ] ]
         ]
 
 
